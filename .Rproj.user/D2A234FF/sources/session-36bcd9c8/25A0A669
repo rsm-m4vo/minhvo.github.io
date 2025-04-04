@@ -3,7 +3,7 @@
     "path": "C:/Users/Bonta/OneDrive - UC San Diego/Desktop/rsm-msba/MGTA 495/quarto_website/index.qmd",
     "project_path": "index.qmd",
     "type": "quarto_markdown",
-    "hash": "0",
+    "hash": "1771812083",
     "contents": "",
     "dirty": false,
     "created": 1743800944698.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "13,3",
+        "cursorPosition": "13,28",
         "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1743801982,
+    "lastKnownWriteTime": 1743807260,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1743801982331,
+    "last_content_update": 1743807260544,
     "read_only": false,
     "read_only_alternatives": []
 }

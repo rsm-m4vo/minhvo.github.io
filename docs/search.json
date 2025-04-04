@@ -7,13 +7,6 @@
     "text": "Download PDF file."
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Minh Vo",
-    "section": "",
-    "text": "Her is a paragraph about me!\n```"
-  },
-  {
     "objectID": "blog.html",
     "href": "blog.html",
     "title": "My Projects",
@@ -40,5 +33,33 @@
     "title": "This is Project 1",
     "section": "",
     "text": "I analyzed the data\n\nlibrary(tidyverse)\nmtcars |&gt;\n  ggplot(aes(x = wt, y = mpg)) +\n  geom_point()"
+  },
+  {
+    "objectID": "blog/project2/index.html",
+    "href": "blog/project2/index.html",
+    "title": "This is Project 2",
+    "section": "",
+    "text": "I cleaned some data\n\n\n\nI analyzed the data\n\nlibrary(tidyverse)\nmtcars |&gt;\n  ggplot(aes(x = wt, y = mpg)) +\n  geom_point()"
+  },
+  {
+    "objectID": "blog/project2/index.html#section-1-data",
+    "href": "blog/project2/index.html#section-1-data",
+    "title": "This is Project 2",
+    "section": "",
+    "text": "I cleaned some data"
+  },
+  {
+    "objectID": "blog/project2/index.html#section-2-analysis",
+    "href": "blog/project2/index.html#section-2-analysis",
+    "title": "This is Project 2",
+    "section": "",
+    "text": "I analyzed the data\n\nlibrary(tidyverse)\nmtcars |&gt;\n  ggplot(aes(x = wt, y = mpg)) +\n  geom_point()"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Minh Vo",
+    "section": "",
+    "text": "Her is a paragraph about me!"
   }
 ]
