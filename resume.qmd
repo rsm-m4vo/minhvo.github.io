@@ -1,0 +1,8 @@
+---
+title: "Resume"
+---
+
+{{< pdf resume/Resume_Minh_Vo.pdf width=100% height=800 >}}
+
+
+
