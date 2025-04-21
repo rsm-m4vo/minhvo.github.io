@@ -6,8 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Your Name">
-<meta name="dcterms.date" content="2025-04-20">
+<meta name="author" content="Minh Vo">
 
 <title>A Replication of Karlan and List (2007) – Minh’s Website</title>
 <style>
@@ -21,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -122,8 +155,11 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
+  <li><a href="#variable-definitions" id="toc-variable-definitions" class="nav-link" data-scroll-target="#variable-definitions">Variable Definitions</a></li>
   <li><a href="#balance-test" id="toc-balance-test" class="nav-link" data-scroll-target="#balance-test">Balance Test</a></li>
   </ul></li>
+  <li><a href="#t-test-and-regression-for-months-since-last-donation" id="toc-t-test-and-regression-for-months-since-last-donation" class="nav-link" data-scroll-target="#t-test-and-regression-for-months-since-last-donation">T-test and regression for months since last donation</a>
+  <ul class="collapse">
   <li><a href="#experimental-results" id="toc-experimental-results" class="nav-link" data-scroll-target="#experimental-results">Experimental Results</a>
   <ul class="collapse">
   <li><a href="#charitable-contribution-made" id="toc-charitable-contribution-made" class="nav-link" data-scroll-target="#charitable-contribution-made">Charitable Contribution Made</a></li>
@@ -134,6 +170,7 @@ ul.task-list li input[type="checkbox"] {
   <ul class="collapse">
   <li><a href="#law-of-large-numbers" id="toc-law-of-large-numbers" class="nav-link" data-scroll-target="#law-of-large-numbers">Law of Large Numbers</a></li>
   <li><a href="#central-limit-theorem" id="toc-central-limit-theorem" class="nav-link" data-scroll-target="#central-limit-theorem">Central Limit Theorem</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -153,14 +190,14 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Your Name </p>
+             <p>Minh Vo </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 20, 2025</p>
+      <p class="date">Invalid Date</p>
     </div>
   </div>
   
@@ -183,18 +220,141 @@ ul.task-list li input[type="checkbox"] {
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
 <p><em>todo: Read the data into R/Python and describe the data</em></p>
-<div class="callout callout-style-simple callout-note no-icon callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
+<p>We begin by loading the dataset provided by the authors. The dataset is stored in the <code>data/</code> directory and contains variables related to donor demographics, past behavior, and treatment assignments.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
 </div>
-<div class="callout-title-container flex-fill">
-Variable Definitions
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
 </div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
 </div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"../../data/karlan_list_2007.dta"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Preview the data</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   treatment         control           ratio           ratio2      
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.000   Min.   :0.0000  
+ 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.000   1st Qu.:0.0000  
+ Median :1.0000   Median :0.0000   Median :1.000   Median :0.0000  
+ Mean   :0.6668   Mean   :0.3332   Mean   :1.334   Mean   :0.2223  
+ 3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:2.000   3rd Qu.:0.0000  
+ Max.   :1.0000   Max.   :1.0000   Max.   :3.000   Max.   :1.0000  
+                                                                   
+     ratio3            size           size25           size50      
+ Min.   :0.0000   Min.   :0.000   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:0.0000   1st Qu.:0.000   1st Qu.:0.0000   1st Qu.:0.0000  
+ Median :0.0000   Median :2.000   Median :0.0000   Median :0.0000  
+ Mean   :0.2222   Mean   :1.667   Mean   :0.1667   Mean   :0.1666  
+ 3rd Qu.:0.0000   3rd Qu.:3.000   3rd Qu.:0.0000   3rd Qu.:0.0000  
+ Max.   :1.0000   Max.   :4.000   Max.   :1.0000   Max.   :1.0000  
+                                                                   
+    size100           sizeno            ask            askd1       
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.000   Min.   :0.0000  
+ 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.000   1st Qu.:0.0000  
+ Median :0.0000   Median :0.0000   Median :1.000   Median :0.0000  
+ Mean   :0.1667   Mean   :0.1667   Mean   :1.334   Mean   :0.2223  
+ 3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:2.000   3rd Qu.:0.0000  
+ Max.   :1.0000   Max.   :1.0000   Max.   :3.000   Max.   :1.0000  
+                                                                   
+     askd2            askd3             ask1             ask2        
+ Min.   :0.0000   Min.   :0.0000   Min.   :  25.0   Min.   :  35.00  
+ 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:  35.0   1st Qu.:  45.00  
+ Median :0.0000   Median :0.0000   Median :  45.0   Median :  60.00  
+ Mean   :0.2223   Mean   :0.2222   Mean   :  71.5   Mean   :  91.79  
+ 3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:  65.0   3rd Qu.:  85.00  
+ Max.   :1.0000   Max.   :1.0000   Max.   :1500.0   Max.   :1875.00  
+                                                                     
+      ask3          amount              gave          amountchange       
+ Min.   :  50   Min.   :  0.0000   Min.   :0.00000   Min.   :-200412.12  
+ 1st Qu.:  55   1st Qu.:  0.0000   1st Qu.:0.00000   1st Qu.:    -50.00  
+ Median :  70   Median :  0.0000   Median :0.00000   Median :    -30.00  
+ Mean   : 111   Mean   :  0.9157   Mean   :0.02065   Mean   :    -52.67  
+ 3rd Qu.: 100   3rd Qu.:  0.0000   3rd Qu.:0.00000   3rd Qu.:    -25.00  
+ Max.   :2250   Max.   :400.0000   Max.   :1.00000   Max.   :    275.00  
+                                                                         
+      hpa             ltmedmra           freq             years       
+ Min.   :   0.00   Min.   :0.0000   Min.   :  0.000   Min.   : 0.000  
+ 1st Qu.:  30.00   1st Qu.:0.0000   1st Qu.:  2.000   1st Qu.: 2.000  
+ Median :  45.00   Median :0.0000   Median :  4.000   Median : 5.000  
+ Mean   :  59.38   Mean   :0.4937   Mean   :  8.039   Mean   : 6.098  
+ 3rd Qu.:  60.00   3rd Qu.:1.0000   3rd Qu.: 10.000   3rd Qu.: 9.000  
+ Max.   :1000.00   Max.   :1.0000   Max.   :218.000   Max.   :95.000  
+                                                      NA's   :1       
+     year5             mrm2           dormant           female      
+ Min.   :0.0000   Min.   :  0.00   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:0.0000   1st Qu.:  4.00   1st Qu.:0.0000   1st Qu.:0.0000  
+ Median :1.0000   Median :  8.00   Median :1.0000   Median :0.0000  
+ Mean   :0.5088   Mean   : 13.01   Mean   :0.5235   Mean   :0.2777  
+ 3rd Qu.:1.0000   3rd Qu.: 19.00   3rd Qu.:1.0000   3rd Qu.:1.0000  
+ Max.   :1.0000   Max.   :168.00   Max.   :1.0000   Max.   :1.0000  
+                  NA's   :1                         NA's   :1111    
+     couple         state50one            nonlit          cases    
+ Min.   :0.0000   Min.   :0.0000000   Min.   :0.000   Min.   :0.0  
+ 1st Qu.:0.0000   1st Qu.:0.0000000   1st Qu.:1.000   1st Qu.:1.0  
+ Median :0.0000   Median :0.0000000   Median :3.000   Median :1.0  
+ Mean   :0.0919   Mean   :0.0009983   Mean   :2.474   Mean   :1.5  
+ 3rd Qu.:0.0000   3rd Qu.:0.0000000   3rd Qu.:4.000   3rd Qu.:2.0  
+ Max.   :1.0000   Max.   :1.0000000   Max.   :6.000   Max.   :4.0  
+ NA's   :1148                         NA's   :452     NA's   :452  
+    statecnt         stateresponse     stateresponset    stateresponsec   
+ Min.   : 0.001995   Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.: 1.833234   1st Qu.:0.01816   1st Qu.:0.01849   1st Qu.:0.01286  
+ Median : 3.538799   Median :0.01971   Median :0.02170   Median :0.01988  
+ Mean   : 5.998820   Mean   :0.02063   Mean   :0.02199   Mean   :0.01772  
+ 3rd Qu.: 9.607021   3rd Qu.:0.02305   3rd Qu.:0.02470   3rd Qu.:0.02081  
+ Max.   :17.368841   Max.   :0.07692   Max.   :0.11111   Max.   :0.05263  
+                                                         NA's   :3        
+ stateresponsetminc     perbush           close25            red0       
+ Min.   :-0.047619   Min.   :0.09091   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:-0.001388   1st Qu.:0.44444   1st Qu.:0.0000   1st Qu.:0.0000  
+ Median : 0.001779   Median :0.48485   Median :0.0000   Median :0.0000  
+ Mean   : 0.004273   Mean   :0.48794   Mean   :0.1857   Mean   :0.4044  
+ 3rd Qu.: 0.010545   3rd Qu.:0.52525   3rd Qu.:0.0000   3rd Qu.:1.0000  
+ Max.   : 0.111111   Max.   :0.73196   Max.   :1.0000   Max.   :1.0000  
+ NA's   :3           NA's   :35        NA's   :35       NA's   :35      
+     blue0            redcty          bluecty           pwhite      
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :0.0094  
+ 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.7558  
+ Median :1.0000   Median :1.0000   Median :0.0000   Median :0.8728  
+ Mean   :0.5956   Mean   :0.5102   Mean   :0.4887   Mean   :0.8196  
+ 3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:0.9388  
+ Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+ NA's   :35       NA's   :105      NA's   :105      NA's   :1866    
+     pblack         page18_39        ave_hh_sz     median_hhincome 
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.000   Min.   :  5000  
+ 1st Qu.:0.0147   1st Qu.:0.2583   1st Qu.:2.210   1st Qu.: 39181  
+ Median :0.0366   Median :0.3055   Median :2.440   Median : 50673  
+ Mean   :0.0867   Mean   :0.3217   Mean   :2.429   Mean   : 54816  
+ 3rd Qu.:0.0909   3rd Qu.:0.3691   3rd Qu.:2.660   3rd Qu.: 66005  
+ Max.   :0.9896   Max.   :0.9975   Max.   :5.270   Max.   :200001  
+ NA's   :2036     NA's   :1866     NA's   :1862    NA's   :1874    
+     powner        psch_atlstba    pop_propurban   
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:0.5602   1st Qu.:0.2356   1st Qu.:0.8849  
+ Median :0.7123   Median :0.3737   Median :1.0000  
+ Mean   :0.6694   Mean   :0.3917   Mean   :0.8720  
+ 3rd Qu.:0.8168   3rd Qu.:0.5300   3rd Qu.:1.0000  
+ Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+ NA's   :1869     NA's   :1868     NA's   :1866    </code></pre>
+</div>
+</div>
+</section>
+<section id="variable-definitions" class="level3">
+<h3 class="anchored" data-anchor-id="variable-definitions">Variable Definitions</h3>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 24%">
@@ -413,9 +573,7 @@ Variable Definitions
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-</div>
+<p>::::</p>
 </section>
 <section id="balance-test" class="level3">
 <h3 class="anchored" data-anchor-id="balance-test">Balance Test</h3>
@@ -423,6 +581,46 @@ Variable Definitions
 <p><em>todo: test a few variables other than the key outcome variables (for example, test months since last donation) to see if the treatment and control groups are statistically significantly different at the 95% confidence level. Do each as a t-test and separately as a linear regression, and confirm you get the exact same results from both methods. When doing a t-test, use the formula in the class slides. When doing the linear regression, regress for example mrm2 on treatment and look at the estimated coefficient on the treatment variable. It might be helpful to compare parts of your analysis to Table 1 in the paper. Be sure to comment on your results (hint: why is Table 1 included in the paper).</em></p>
 </section>
 </section>
+<section id="t-test-and-regression-for-months-since-last-donation" class="level1">
+<h1>T-test and regression for months since last donation</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(df, <span class="fu">t.test</span>(mrm2 <span class="sc">~</span> treatment))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  mrm2 by treatment
+t = -0.11953, df = 33394, p-value = 0.9049
+alternative hypothesis: true difference in means between group 0 and group 1 is not equal to 0
+95 percent confidence interval:
+ -0.2381015  0.2107298
+sample estimates:
+mean in group 0 mean in group 1 
+       12.99814        13.01183 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(mrm2 <span class="sc">~</span> treatment, <span class="at">data =</span> df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = mrm2 ~ treatment, data = df)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-13.012  -9.012  -5.012   6.002 154.988 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 12.99814    0.09353 138.979   &lt;2e-16 ***
+treatment    0.01369    0.11453   0.119    0.905    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 12.08 on 50080 degrees of freedom
+  (1 observation deleted due to missingness)
+Multiple R-squared:  2.851e-07, Adjusted R-squared:  -1.968e-05 
+F-statistic: 0.01428 on 1 and 50080 DF,  p-value: 0.9049</code></pre>
+</div>
+</div>
 <section id="experimental-results" class="level2">
 <h2 class="anchored" data-anchor-id="experimental-results">Experimental Results</h2>
 <section id="charitable-contribution-made" class="level3">
@@ -431,6 +629,61 @@ Variable Definitions
 <p><em>todo: make a barplot with two bars. Each bar is the proportion of people who donated. One bar for treatment and one bar for control.</em></p>
 <p><em>todo: run a t-test between the treatment and control groups on the binary outcome of whether any charitable donation was made. Also run a bivariate linear regression that demonstrates the same finding. (It may help to confirm your calculations match Table 2a Panel A.) Report your statistical results and interpret them in the context of the experiment (e.g., if you found a difference with a small p-value or that was statistically significant at some threshold, what have you learned about human behavior? Use mostly English words, not numbers or stats, to explain your finding.)</em></p>
 <p><em>todo: run a probit regression where the outcome variable is whether any charitable donation was made and the explanatory variable is assignment to treatment or control. Confirm that your results replicate Table 3 column 1 in the paper.</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Proportion barplot</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>prop_data <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(treatment) <span class="sc">%&gt;%</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">rate =</span> <span class="fu">mean</span>(gave))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(prop_data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(treatment), <span class="at">y =</span> rate, <span class="at">fill =</span> <span class="fu">factor</span>(treatment))) <span class="sc">+</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Group"</span>, <span class="at">y =</span> <span class="st">"Proportion Donated"</span>, <span class="at">fill =</span> <span class="st">"Group"</span>) <span class="sc">+</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Donation Rate by Treatment Group"</span>) <span class="sc">+</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw1_questions_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># T-test and linear regression</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(df, <span class="fu">t.test</span>(gave <span class="sc">~</span> treatment))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  gave by treatment
+t = -3.2095, df = 36577, p-value = 0.001331
+alternative hypothesis: true difference in means between group 0 and group 1 is not equal to 0
+95 percent confidence interval:
+ -0.006733310 -0.001627399
+sample estimates:
+mean in group 0 mean in group 1 
+     0.01785821      0.02203857 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(gave <span class="sc">~</span> treatment, <span class="at">data =</span> df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = gave ~ treatment, data = df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.02204 -0.02204 -0.02204 -0.01786  0.98214 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 0.017858   0.001101  16.225  &lt; 2e-16 ***
+treatment   0.004180   0.001348   3.101  0.00193 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1422 on 50081 degrees of freedom
+Multiple R-squared:  0.000192,  Adjusted R-squared:  0.0001721 
+F-statistic: 9.618 on 1 and 50081 DF,  p-value: 0.001927</code></pre>
+</div>
+</div>
 </section>
 <section id="differences-between-match-rates" class="level3">
 <h3 class="anchored" data-anchor-id="differences-between-match-rates">Differences between Match Rates</h3>
@@ -438,6 +691,61 @@ Variable Definitions
 <p><em>todo: Use a series of t-tests to test whether the size of the match ratio has an effect on whether people donate or not. For example, does the 2:1 match rate lead increase the likelihood that someone donates as compared to the 1:1 match rate? Do your results support the “figures suggest” comment the authors make on page 8?</em></p>
 <p><em>todo: Assess the same issue using a regression. Specifically, create the variable <code>ratio1</code> then regress <code>gave</code> on <code>ratio1</code>, <code>ratio2</code>, and <code>ratio3</code> (or alternatively, regress <code>gave</code> on the categorical variable <code>ratio</code>). Interpret the coefficients and their statistical precision.</em></p>
 <p><em>todo: Calculate the response rate difference between the 1:1 and 2:1 match ratios and the 2:1 and 3:1 ratios. Do this directly from the data, and do it by computing the differences in the fitted coefficients of the previous regression. what do you conclude regarding the effectiveness of different sizes of matched donations?</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare 1:1 vs 2:1 match</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(df, <span class="fu">t.test</span>(gave[ratio2 <span class="sc">==</span> <span class="dv">1</span>], gave[ratio <span class="sc">==</span> <span class="dv">1</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  gave[ratio2 == 1] and gave[ratio == 1]
+t = 0.96505, df = 22225, p-value = 0.3345
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.001942773  0.005711275
+sample estimates:
+ mean of x  mean of y 
+0.02263338 0.02074912 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare 2:1 vs 3:1 match</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(df, <span class="fu">t.test</span>(gave[ratio3 <span class="sc">==</span> <span class="dv">1</span>], gave[ratio2 <span class="sc">==</span> <span class="dv">1</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  gave[ratio3 == 1] and gave[ratio2 == 1]
+t = 0.050116, df = 22261, p-value = 0.96
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.003811996  0.004012044
+sample estimates:
+ mean of x  mean of y 
+0.02273340 0.02263338 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Regression</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(gave <span class="sc">~</span> ratio2 <span class="sc">+</span> ratio3, <span class="at">data =</span> df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = gave ~ ratio2 + ratio3, data = df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.02273 -0.02263 -0.01902 -0.01902  0.98098 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 0.0190151  0.0008525  22.306   &lt;2e-16 ***
+ratio2      0.0036183  0.0015945   2.269   0.0233 *  
+ratio3      0.0037183  0.0015948   2.332   0.0197 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1422 on 50080 degrees of freedom
+Multiple R-squared:  0.0001644, Adjusted R-squared:  0.0001245 
+F-statistic: 4.117 on 2 and 50080 DF,  p-value: 0.0163</code></pre>
+</div>
+</div>
 </section>
 <section id="size-of-charitable-contribution" class="level3">
 <h3 class="anchored" data-anchor-id="size-of-charitable-contribution">Size of Charitable Contribution</h3>
@@ -445,6 +753,81 @@ Variable Definitions
 <p><em>todo: Calculate a t-test or run a bivariate linear regression of the donation amount on the treatment status. What do we learn from doing this analysis?</em></p>
 <p><em>todo: now limit the data to just people who made a donation and repeat the previous analysis. This regression allows you to analyze how much respondents donate conditional on donating some positive amount. Interpret the regression coefficients – what did we learn? Does the treatment coefficient have a causal interpretation?</em></p>
 <p><em>todo: Make two plot: one for the treatment group and one for the control. Each plot should be a histogram of the donation amounts only among people who donated. Add a red vertical bar or some other annotation to indicate the sample average for each plot.</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bivariate regression</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(amount <span class="sc">~</span> treatment, <span class="at">data =</span> df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = amount ~ treatment, data = df)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+ -0.97  -0.97  -0.97  -0.81 399.03 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  0.81327    0.06742  12.063   &lt;2e-16 ***
+treatment    0.15361    0.08256   1.861   0.0628 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 8.709 on 50081 degrees of freedom
+Multiple R-squared:  6.911e-05, Adjusted R-squared:  4.915e-05 
+F-statistic: 3.461 on 1 and 50081 DF,  p-value: 0.06282</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter for donors only</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>df_givers <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(gave <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Regression on amount among givers</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(amount <span class="sc">~</span> treatment, <span class="at">data =</span> df_givers))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = amount ~ treatment, data = df_givers)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-43.54 -23.87 -18.87   6.13 356.13 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   45.540      2.423  18.792   &lt;2e-16 ***
+treatment     -1.668      2.872  -0.581    0.561    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 41.83 on 1032 degrees of freedom
+Multiple R-squared:  0.0003268, Adjusted R-squared:  -0.0006419 
+F-statistic: 0.3374 on 1 and 1032 DF,  p-value: 0.5615</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram for treatment</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_givers <span class="sc">%&gt;%</span> <span class="fu">filter</span>(treatment <span class="sc">==</span> <span class="dv">1</span>), <span class="fu">aes</span>(<span class="at">x =</span> amount)) <span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">10</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>) <span class="sc">+</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(amount)), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Donation Amounts (Treatment Group)"</span>, <span class="at">x =</span> <span class="st">"Amount"</span>, <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw1_questions_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram for control</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_givers <span class="sc">%&gt;%</span> <span class="fu">filter</span>(treatment <span class="sc">==</span> <span class="dv">0</span>), <span class="fu">aes</span>(<span class="at">x =</span> amount)) <span class="sc">+</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">10</span>, <span class="at">fill =</span> <span class="st">"darkorange"</span>) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(amount)), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Donation Amounts (Control Group)"</span>, <span class="at">x =</span> <span class="st">"Amount"</span>, <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw1_questions_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="simulation-experiment" class="level2">
@@ -455,12 +838,51 @@ Variable Definitions
 <section id="law-of-large-numbers" class="level3">
 <h3 class="anchored" data-anchor-id="law-of-large-numbers">Law of Large Numbers</h3>
 <p><em>to do: Make a plot like those on slide 43 from our first class and explain the plot to the reader. To do this, you will simulate 100,00 draws from the control distribution and 10,000 draws from the treatment distribution. You’ll then calculate a vector of 10,000 differences, and then you’ll plot the cumulative average of that vector of differences. Comment on whether the cumulative average approaches the true difference in means.</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>ctrl <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">100000</span>, <span class="dv">1</span>, <span class="fl">0.018</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>treat <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">10000</span>, <span class="dv">1</span>, <span class="fl">0.022</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>diffs <span class="ot">&lt;-</span> treat <span class="sc">-</span> <span class="fu">sample</span>(ctrl, <span class="dv">10000</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>cum_avg <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(diffs)<span class="sc">/</span><span class="fu">seq_along</span>(diffs)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cum_avg, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">ylab =</span> <span class="st">"Cumulative Avg Diff"</span>, <span class="at">main =</span> <span class="st">"LLN: Cumulative Difference"</span>, <span class="at">xlab =</span> <span class="st">"Simulations"</span>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.004</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw1_questions_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="central-limit-theorem" class="level3">
 <h3 class="anchored" data-anchor-id="central-limit-theorem">Central Limit Theorem</h3>
 <p><em>to do: Make 4 histograms like those on slide 44 from our first class at sample sizes 50, 200, 500, and 1000 and explain these plots to the reader. To do this for a sample size of e.g.&nbsp;50, take 50 draws from each of the control and treatment distributions, and calculate the average difference between those draws. Then repeat that process 999 more times so that you have 1000 averages. Plot the histogram of those averages. Comment on whether zero is in the “middle” of the distribution or whether it’s in the “tail.”</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>sample_sizes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">200</span>, <span class="dv">500</span>, <span class="dv">1000</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (n <span class="cf">in</span> sample_sizes) {</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  diffs <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    m_treat <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.022</span>))</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    m_ctrl <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.018</span>))</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    m_treat <span class="sc">-</span> m_ctrl</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hist</span>(diffs, <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Sample size ="</span>, n), <span class="at">xlab =</span> <span class="st">"Mean Differences"</span>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw1_questions_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
+</section>
 </section>
 </section>
 

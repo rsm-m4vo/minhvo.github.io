@@ -1,7 +1,7 @@
 ---
 title: "A Replication of Karlan and List (2007)"
-author: "Your Name"
-date: today
+author: "Minh Vo"
+date: April 20th, 2025
 callout-appearance: minimal # this hides the blue "i" icon on .callout-notes
 ---
 
@@ -21,7 +21,21 @@ This project seeks to replicate their results.
 
 _todo: Read the data into R/Python and describe the data_
 
-:::: {.callout-note collapse="true"}
+We begin by loading the dataset provided by the authors. The dataset is stored in the `data/` directory and contains variables related to donor demographics, past behavior, and treatment assignments.
+
+```{r}
+library(haven)
+library(dplyr)
+library(ggplot2)
+
+# Load data
+df <- read_dta("../../data/karlan_list_2007.dta")
+
+# Preview the data
+summary(df)
+
+```
+
 ### Variable Definitions
 
 | Variable             | Description                                                         |
@@ -87,6 +101,11 @@ As an ad hoc test of the randomization mechanism, I provide a series of tests th
 
 _todo: test a few variables other than the key outcome variables (for example, test months since last donation) to see if the treatment and control groups are statistically significantly different at the 95% confidence level. Do each as a t-test and separately as a linear regression, and confirm you get the exact same results from both methods. When doing a t-test, use the formula in the class slides. When doing the linear regression, regress for example mrm2 on treatment and look at the estimated coefficient on the treatment variable. It might be helpful to compare parts of your analysis to Table 1 in the paper. Be sure to comment on your results (hint: why is Table 1 included in the paper)._
 
+# T-test and regression for months since last donation
+```{r}
+with(df, t.test(mrm2 ~ treatment))
+summary(lm(mrm2 ~ treatment, data = df))
+```
 
 ## Experimental Results
 
@@ -100,6 +119,23 @@ _todo: run a t-test between the treatment and control groups on the binary outco
 
 _todo: run a probit regression where the outcome variable is whether any charitable donation was made and the explanatory variable is assignment to treatment or control. Confirm that your results replicate Table 3 column 1 in the paper._
 
+```{r}
+# Proportion barplot
+prop_data <- df %>%
+  group_by(treatment) %>%
+  summarise(rate = mean(gave))
+
+ggplot(prop_data, aes(x = factor(treatment), y = rate, fill = factor(treatment))) +
+  geom_bar(stat = "identity") +
+  labs(x = "Group", y = "Proportion Donated", fill = "Group") +
+  ggtitle("Donation Rate by Treatment Group") +
+  theme_minimal()
+
+# T-test and linear regression
+with(df, t.test(gave ~ treatment))
+summary(lm(gave ~ treatment, data = df))
+```
+
 
 ### Differences between Match Rates
 
@@ -111,6 +147,15 @@ _todo: Assess the same issue using a regression. Specifically, create the variab
 
 _todo: Calculate the response rate difference between the 1:1 and 2:1 match ratios and the 2:1 and 3:1 ratios.  Do this directly from the data, and do it by computing the differences in the fitted coefficients of the previous regression. what do you conclude regarding the effectiveness of different sizes of matched donations?_
 
+```{r}
+# Compare 1:1 vs 2:1 match
+with(df, t.test(gave[ratio2 == 1], gave[ratio == 1]))
+# Compare 2:1 vs 3:1 match
+with(df, t.test(gave[ratio3 == 1], gave[ratio2 == 1]))
+
+# Regression
+summary(lm(gave ~ ratio2 + ratio3, data = df))
+```
 
 ### Size of Charitable Contribution
 
@@ -122,6 +167,30 @@ _todo: now limit the data to just people who made a donation and repeat the prev
 
 _todo: Make two plot: one for the treatment group and one for the control. Each plot should be a histogram of the donation amounts only among people who donated. Add a red vertical bar or some other annotation to indicate the sample average for each plot._
 
+```{r}
+# Bivariate regression
+summary(lm(amount ~ treatment, data = df))
+
+# Filter for donors only
+df_givers <- df %>% filter(gave == 1)
+
+# Regression on amount among givers
+summary(lm(amount ~ treatment, data = df_givers))
+
+# Histogram for treatment
+ggplot(df_givers %>% filter(treatment == 1), aes(x = amount)) +
+  geom_histogram(binwidth = 10, fill = "steelblue") +
+  geom_vline(aes(xintercept = mean(amount)), color = "red", linetype = "dashed") +
+  labs(title = "Donation Amounts (Treatment Group)", x = "Amount", y = "Count") +
+  theme_minimal()
+
+# Histogram for control
+ggplot(df_givers %>% filter(treatment == 0), aes(x = amount)) +
+  geom_histogram(binwidth = 10, fill = "darkorange") +
+  geom_vline(aes(xintercept = mean(amount)), color = "red", linetype = "dashed") +
+  labs(title = "Donation Amounts (Control Group)", x = "Amount", y = "Count") +
+  theme_minimal()
+```
 
 ## Simulation Experiment
 
@@ -135,12 +204,32 @@ Further suppose that the true distribution of respondents who do get a charitabl
 
 _to do:  Make a plot like those on slide 43 from our first class and explain the plot to the reader. To do this, you will simulate 100,00 draws from the control distribution and 10,000 draws from the treatment distribution. You'll then calculate a vector of 10,000 differences, and then you'll plot the cumulative average of that vector of differences. Comment on whether the cumulative average approaches the true difference in means._
 
+```{r}
+set.seed(123)
+ctrl <- rbinom(100000, 1, 0.018)
+treat <- rbinom(10000, 1, 0.022)
+diffs <- treat - sample(ctrl, 10000)
+cum_avg <- cumsum(diffs)/seq_along(diffs)
+
+plot(cum_avg, type = "l", col = "blue", ylab = "Cumulative Avg Diff", main = "LLN: Cumulative Difference", xlab = "Simulations")
+abline(h = 0.004, col = "red", lty = 2)
+```
 
 ### Central Limit Theorem
 
 _to do: Make 4 histograms like those on slide 44 from our first class at sample sizes 50, 200, 500, and 1000 and explain these plots to the reader. To do this for a sample size of e.g. 50, take 50 draws from each of the control and treatment distributions, and calculate the average difference between those draws. Then repeat that process 999 more times so that you have 1000 averages. Plot the histogram of those averages. Comment on whether zero is in the "middle" of the distribution or whether it's in the "tail."_
 
+```{r}
+sample_sizes <- c(50, 200, 500, 1000)
 
-
-
-
+par(mfrow = c(2, 2))
+for (n in sample_sizes) {
+  diffs <- replicate(1000, {
+    m_treat <- mean(rbinom(n, 1, 0.022))
+    m_ctrl <- mean(rbinom(n, 1, 0.018))
+    m_treat - m_ctrl
+  })
+  hist(diffs, main = paste("Sample size =", n), xlab = "Mean Differences")
+}
+par(mfrow = c(1, 1))
+```
