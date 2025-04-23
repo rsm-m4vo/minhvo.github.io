@@ -92,8 +92,6 @@ summary(df)
 | `psch_atlstba`       | Proportion who finished college within zip code                     |
 | `pop_propurban`      | Proportion of population urban within zip code                      |
 
-::::
-
 
 ### Balance Test 
 
