@@ -11,4 +11,4 @@ about:
 ---
 
 
-Her is a paragraph about me!
+Here is a paragraph about me!
