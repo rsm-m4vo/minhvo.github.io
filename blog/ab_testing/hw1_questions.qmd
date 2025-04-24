@@ -22,10 +22,11 @@ This project seeks to replicate their results.
 
 We begin by loading the dataset using the haven package, which allows us to read Stata .dta files into R. The dataset contains 50,083 observations, each representing an individual who received a fundraising letter. It includes information on treatment assignment, match ratios, suggested donation amounts, previous giving behavior, and demographic characteristics.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(haven)
 library(dplyr)
 library(ggplot2)
+library(modelsummary)
 
 # Load data
 df <- read_dta("../../data/karlan_list_2007.dta")
@@ -108,7 +109,7 @@ The two-sample t-test yields a p-value of 0.9049, suggesting that there is no st
 
 #### Regression for balance
 ```{r}
-summary(lm(mrm2 ~ treatment, data = df))
+modelsummary(lm(mrm2 ~ treatment, data = df))
 ```
 
 The linear regression confirms this result. The estimated coefficient on treatment is very small (≈ 0.014) and not statistically significant (p = 0.905), indicating that group assignment does not explain any meaningful variation in donation recency.
@@ -145,7 +146,7 @@ We now formally test the difference in donation rates using both a two-sample t-
 t.test(gave ~ treatment, data = df)
 
 # Linear regression
-summary(lm(gave ~ treatment, data = df))
+modelsummary(lm(gave ~ treatment, data = df))
 ```
 
 Both approaches yield consistent results. The t-test produces a statistically significant p-value (~0.0013), and the regression confirms that being in the treatment group increases the likelihood of donating by about 0.4 percentage points. While this may seem small, it’s meaningful given the very low baseline donation rate (~1.8% in the control group). These results replicate Table 2a Panel A in the original paper and demonstrate that even a modest match offer has a real behavioral effect.
@@ -184,7 +185,7 @@ The p-values for both comparisons (0.33 and 0.96, respectively) suggest that dif
 We also run a regression using indicator variables for 2:1 and 3:1 matches (with 1:1 match as the omitted baseline):
 
 ```{r}
-summary(lm(gave ~ ratio2 + ratio3, data = df))
+modelsummary(lm(gave ~ ratio2 + ratio3, data = df))
 ```
 
 The regression shows that being offered a 2:1 match increases the likelihood of giving by ~0.36 percentage points compared to a 1:1 match, while a 3:1 match increases it by ~0.37 points. Both coefficients are statistically significant at the 5% level. However, the practical effect sizes are small, and the increase from 2:1 to 3:1 is negligible — suggesting diminishing marginal returns to match size.
@@ -216,7 +217,7 @@ So far, we've focused on whether the matching offer increases the **likelihood**
 
 First, we run a regression on the full dataset, comparing average donation amounts between the treatment and control groups.
 ```{r}
-summary(lm(amount ~ treatment, data = df))
+modelsummary(lm(amount ~ treatment, data = df))
 ```
 
 The treatment group gives about $0.15 more on average than the control group, but the difference is not statistically significant at the conventional 5% level (p = 0.063). This weak evidence suggests that while more people may give when matched, their contribution amounts do not increase meaningfully.
@@ -225,7 +226,7 @@ The treatment group gives about $0.15 more on average than the control group, bu
 Next, we restrict our analysis to only those who donated (gave == 1) to assess whether matched donors give more conditional on giving.
 ```{r}
 df_givers <- df %>% filter(gave == 1)
-summary(lm(amount ~ treatment, data = df_givers))
+modelsummary(lm(amount ~ treatment, data = df_givers))
 ```
 
 Among donors, the treatment effect disappears entirely. In fact, treated donors gave $1.67 less on average than the control group — though again, this result is not statistically significant (p = 0.56). This suggests that while match offers may encourage more people to give, they don’t necessarily give more money once they do.
