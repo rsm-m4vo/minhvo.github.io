@@ -296,10 +296,7 @@ To complement the Law of Large Numbers, we now illustrate the **Central Limit Th
 
 #### Simulation Setup
 
-We simulate differences in donation rates between treatment and control groups using four different sample sizes - 50, 200, 500, and 1000. For each size:
-- We draw `n` Bernoulli observations from both the treatment (`p = 0.022`) and control (`p = 0.018`) distributions.
-- We calculate the difference in sample means.
-- We repeat this 1,000 times to build a distribution of mean differences.
+We simulate differences in donation rates between treatment and control groups using four different sample sizes: 50, 200, 500, and 1000. For each sample size, we draw 'n' Bernoulli observations from the treatment group with a success probability of 0.022 and 'n' observations from the control group with a success probability of 0.018. We then compute the difference in sample means for each simulated pair. This process is repeated 1,000 times to generate a distribution of mean differences for each sample size.
 ```{r}
 sample_sizes <- c(50, 200, 500, 1000)
 
