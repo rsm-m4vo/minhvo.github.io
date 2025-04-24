@@ -99,14 +99,14 @@ As an ad hoc test of the randomization mechanism, I provide a series of tests th
 
 To assess the success of the randomization, we compare the treatment and control groups on a pre-treatment variable: mrm2, which represents the number of months since the last donation. If the randomization was effective, we would expect no significant differences between the two groups on this variable.
 
-# T-test for balance
+#### T-test for balance
 ```{r}
 t.test(mrm2 ~ treatment, data = df)
 ```
 
 The two-sample t-test yields a p-value of 0.9049, suggesting that there is no statistically significant difference between the treatment and control groups in terms of their recency of last donation.
 
-# Regression for balance
+#### Regression for balance
 ```{r}
 summary(lm(mrm2 ~ treatment, data = df))
 ```
@@ -136,7 +136,7 @@ ggplot(prop_data, aes(x = factor(treatment), y = rate, fill = factor(treatment))
 ```
 This visual shows that the donation rate was noticeably higher among those who received a matching offer.
 
-### T-test and Linear Regression
+#### T-test and Linear Regression
 
 We now formally test the difference in donation rates using both a two-sample t-test and a simple linear regression.
 
@@ -150,7 +150,7 @@ summary(lm(gave ~ treatment, data = df))
 
 Both approaches yield consistent results. The t-test produces a statistically significant p-value (~0.0013), and the regression confirms that being in the treatment group increases the likelihood of donating by about 0.4 percentage points. While this may seem small, it’s meaningful given the very low baseline donation rate (~1.8% in the control group). These results replicate Table 2a Panel A in the original paper and demonstrate that even a modest match offer has a real behavioral effect.
 
-### Probit Regression
+#### Probit Regression
 To further validate the result, we run a probit regression where the dependent variable is gave and the independent variable is treatment.
 
 ```{r}
@@ -163,7 +163,7 @@ The probit model returns a positive and statistically significant coefficient on
 
 In this section, we explore whether the size of the matching ratio affects the likelihood of giving. Specifically, we test whether individuals were more likely to donate when offered a 2:1 or 3:1 match compared to a standard 1:1 match.
 
-### T-tests Between Match Ratios
+#### T-tests Between Match Ratios
 
 We begin by running two pairwise t-tests:
 - The first compares donation rates between those offered a 1:1 match and those offered a 2:1 match.
@@ -179,7 +179,7 @@ t.test(df$gave[df$ratio3 == 1], df$gave[df$ratio2 == 1])
 
 The p-values for both comparisons (0.33 and 0.96, respectively) suggest that differences in match ratios do not produce statistically significant changes in donation behavior. This supports the authors’ observation in the paper that while match presence boosts donations, increasing the match size offers diminishing returns.
 
-### Regression on Match Ratios
+#### Regression on Match Ratios
 
 We also run a regression using indicator variables for 2:1 and 3:1 matches (with 1:1 match as the omitted baseline):
 
@@ -202,40 +202,46 @@ diff_3vs2 <- mean_3to1 - mean_2to1
 
 These calculations confirm the regression results. The response rate increases slightly from 1:1 to 2:1, and barely at all from 2:1 to 3:1. This aligns with the authors' interpretation on page 8, where they suggest that the presence of a match matters more than its size.
 
-### Interpretation
+#### Interpretation
 The evidence here suggests that once donors are presented with a match, increasing the match ratio (from 1:1 to 2:1 to 3:1) does not substantially change behavior. This has important implications for nonprofits: just offering a match may be sufficient, and investing in larger match ratios might not yield proportionally better outcomes.
 
-### Difference in Response Rates
+#### Difference in Response Rates
 Finally, we compare raw response rates directly:
 
 ### Size of Charitable Contribution
 
-In this subsection, I analyze the effect of the size of matched donation on the size of the charitable contribution.
+So far, we've focused on whether the matching offer increases the **likelihood** of donating. Now, we turn to the **size** of the donation. Does the presence of a match lead to larger contributions?
 
-_todo: Calculate a t-test or run a bivariate linear regression of the donation amount on the treatment status. What do we learn from doing this analysis?_
+#### Average Donation Amount (All Participants)
 
-_todo: now limit the data to just people who made a donation and repeat the previous analysis. This regression allows you to analyze how much respondents donate conditional on donating some positive amount. Interpret the regression coefficients -- what did we learn? Does the treatment coefficient have a causal interpretation?_ 
+First, we run a regression on the full dataset, comparing average donation amounts between the treatment and control groups.
+```{r}
+summary(lm(amount ~ treatment, data = df))
+```
 
-_todo: Make two plot: one for the treatment group and one for the control. Each plot should be a histogram of the donation amounts only among people who donated. Add a red vertical bar or some other annotation to indicate the sample average for each plot._
+The treatment group gives about $0.15 more on average than the control group, but the difference is not statistically significant at the conventional 5% level (p = 0.063). This weak evidence suggests that while more people may give when matched, their contribution amounts do not increase meaningfully.
+
+#### Average Donation Among Donors Only
+Next, we restrict our analysis to only those who donated (gave == 1) to assess whether matched donors give more conditional on giving.
+```{r}
+df_givers <- df %>% filter(gave == 1)
+summary(lm(amount ~ treatment, data = df_givers))
+```
+
+Among donors, the treatment effect disappears entirely. In fact, treated donors gave $1.67 less on average than the control group — though again, this result is not statistically significant (p = 0.56). This suggests that while match offers may encourage more people to give, they don’t necessarily give more money once they do.
+
+#### Donation Amount Distributions
+To visualize the donation behavior of those who gave, we plot histograms of donation amounts for the treatment and control groups. The red vertical line in each plot represents the group’s average donation.
 
 ```{r}
-# Bivariate regression
-summary(lm(amount ~ treatment, data = df))
-
-# Filter for donors only
-df_givers <- df %>% filter(gave == 1)
-
-# Regression on amount among givers
-summary(lm(amount ~ treatment, data = df_givers))
-
-# Histogram for treatment
+# Treatment group
 ggplot(df_givers %>% filter(treatment == 1), aes(x = amount)) +
   geom_histogram(binwidth = 10, fill = "steelblue") +
   geom_vline(aes(xintercept = mean(amount)), color = "red", linetype = "dashed") +
   labs(title = "Donation Amounts (Treatment Group)", x = "Amount", y = "Count") +
   theme_minimal()
 
-# Histogram for control
+# Control group
 ggplot(df_givers %>% filter(treatment == 0), aes(x = amount)) +
   geom_histogram(binwidth = 10, fill = "darkorange") +
   geom_vline(aes(xintercept = mean(amount)), color = "red", linetype = "dashed") +
@@ -243,17 +249,28 @@ ggplot(df_givers %>% filter(treatment == 0), aes(x = amount)) +
   theme_minimal()
 ```
 
+These plots show that the donation distributions are quite similar. Both are right-skewed (most people give small amounts), and the average donation is roughly the same across groups.
+
+#### Interpretation
+This analysis reinforces a key idea from the original study: matching offers are effective at increasing participation, but not necessarily donation size. While the psychological nudge of a match encourages people to give, it doesn’t seem to change how much they give once they've decided to contribute. Also, because these results come from an observational regression, and giving is influenced by many factors, the treatment coefficient should not be interpreted as causal without stronger identification assumptions.
+
 ## Simulation Experiment
 
-As a reminder of how the t-statistic "works," in this section I use simulation to demonstrate the Law of Large Numbers and the Central Limit Theorem.
+To reinforce our understanding of the t-statistic and the foundations of hypothesis testing, we run a simulation to illustrate the **Law of Large Numbers**. The idea is to observe how the difference in sample means behaves as the number of simulations grows.
 
-Suppose the true distribution of respondents who do not get a charitable donation match is Bernoulli with probability p=0.018 that a donation is made. 
+Suppose we know the following “true” probabilities of donating:
+- Control group (no match): 1.8% (`p = 0.018`)
+- Treatment group (match offer): 2.2% (`p = 0.022`)
 
-Further suppose that the true distribution of respondents who do get a charitable donation match of any size  is Bernoulli with probability p=0.022 that a donation is made.
+We'll simulate thousands of draws from each group and track how the average difference evolves.
 
 ### Law of Large Numbers
 
-_to do:  Make a plot like those on slide 43 from our first class and explain the plot to the reader. To do this, you will simulate 100,00 draws from the control distribution and 10,000 draws from the treatment distribution. You'll then calculate a vector of 10,000 differences, and then you'll plot the cumulative average of that vector of differences. Comment on whether the cumulative average approaches the true difference in means._
+The Law of Large Numbers (LLN) tells us that as the number of observations increases, the sample average will converge to the true population mean. To visualize this, we simulate:
+- 100,000 individuals from the control distribution
+- 10,000 individuals from the treatment distribution (drawn with replacement from the control group)
+- A vector of 10,000 differences in donation outcomes
+- The cumulative average of these differences
 
 ```{r}
 set.seed(123)
@@ -262,25 +279,57 @@ treat <- rbinom(10000, 1, 0.022)
 diffs <- treat - sample(ctrl, 10000)
 cum_avg <- cumsum(diffs)/seq_along(diffs)
 
-plot(cum_avg, type = "l", col = "blue", ylab = "Cumulative Avg Diff", main = "LLN: Cumulative Difference", xlab = "Simulations")
+plot(cum_avg, type = "l", col = "blue", ylab = "Cumulative Avg Diff",
+     main = "LLN: Cumulative Difference", xlab = "Simulations")
 abline(h = 0.004, col = "red", lty = 2)
 ```
 
+The red dashed line represents the true difference in donation probabilities: 0.022 - 0.018 = 0.004. As the number of simulations increases, the cumulative average converges toward this value — beautifully demonstrating the Law of Large Numbers in action.
+
+#### Interpretation
+
+This plot helps explain why, in large datasets, sample averages become reliable estimates of population parameters. It also reminds us that random variation in small samples can be misleading, but that variation smooths out as more data is collected — a core principle behind statistical inference.
+
 ### Central Limit Theorem
 
-_to do: Make 4 histograms like those on slide 44 from our first class at sample sizes 50, 200, 500, and 1000 and explain these plots to the reader. To do this for a sample size of e.g. 50, take 50 draws from each of the control and treatment distributions, and calculate the average difference between those draws. Then repeat that process 999 more times so that you have 1000 averages. Plot the histogram of those averages. Comment on whether zero is in the "middle" of the distribution or whether it's in the "tail."_
+To complement the Law of Large Numbers, we now illustrate the **Central Limit Theorem (CLT)** using simulation. While LLN tells us the average converges to the truth, the CLT tells us **what the distribution of those averages looks like** — specifically, that they tend to follow a normal (bell-shaped) distribution as the sample size increases.
 
+#### Simulation Setup
+
+We simulate differences in donation rates between treatment and control groups using four different sample sizes - 50, 200, 500, and 1000. For each size:
+- We draw `n` Bernoulli observations from both the treatment (`p = 0.022`) and control (`p = 0.018`) distributions.
+- We calculate the difference in sample means.
+- We repeat this 1,000 times to build a distribution of mean differences.
 ```{r}
 sample_sizes <- c(50, 200, 500, 1000)
 
-par(mfrow = c(2, 2))
+par(mfrow = c(2, 2))  # 2x2 grid of plots
+
 for (n in sample_sizes) {
   diffs <- replicate(1000, {
     m_treat <- mean(rbinom(n, 1, 0.022))
     m_ctrl <- mean(rbinom(n, 1, 0.018))
     m_treat - m_ctrl
   })
-  hist(diffs, main = paste("Sample size =", n), xlab = "Mean Differences")
+  hist(diffs,
+       main = paste("Sample size =", n),
+       xlab = "Mean Differences",
+       col = "lightblue",
+       border = "white")
 }
-par(mfrow = c(1, 1))
+
+par(mfrow = c(1, 1))  # reset layout
 ```
+
+#### Interpretation
+
+These four histograms provide a striking visual of the Central Limit Theorem in action:
+
+- Small samples (n = 50) produce wider, bumpier distributions — lots of variation and a high chance of sampling noise.
+
+- As sample size increases (n = 200, 500, 1000), the distributions become smoother and more bell-shaped, and they center more tightly around the true difference (0.004).
+
+In all cases, the peak of the histogram tends to cluster near the actual expected difference between treatment and control. This shows how even when dealing with binary outcomes (like whether someone donates), sample averages will behave predictably with enough data.
+
+## Conclusion
+This replication of Karlan and List's (2007) field experiment confirms several of their key findings: simply offering a matching donation significantly increases the likelihood that someone donates, while the specific size of the match (1:1, 2:1, 3:1) has little additional impact. Moreover, while more people give when a match is present, the size of their donation does not appear to increase, suggesting the match offer primarily affects participation, not generosity. Through simulation, we also demonstrated fundamental statistical principles that help explain why their findings hold in large samples. Altogether, this analysis reinforces the power of simple behavioral nudges in fundraising, and highlights the importance of both thoughtful experimental design and rigorous statistical interpretation in social science research.

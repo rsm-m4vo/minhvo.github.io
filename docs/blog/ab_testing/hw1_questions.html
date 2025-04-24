@@ -159,19 +159,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#variable-definitions" id="toc-variable-definitions" class="nav-link" data-scroll-target="#variable-definitions">Variable Definitions</a></li>
   <li><a href="#balance-test" id="toc-balance-test" class="nav-link" data-scroll-target="#balance-test">Balance Test</a></li>
   </ul></li>
-  <li><a href="#t-test-for-balance" id="toc-t-test-for-balance" class="nav-link" data-scroll-target="#t-test-for-balance">T-test for balance</a></li>
-  <li><a href="#regression-for-balance" id="toc-regression-for-balance" class="nav-link" data-scroll-target="#regression-for-balance">Regression for balance</a>
-  <ul class="collapse">
   <li><a href="#experimental-results" id="toc-experimental-results" class="nav-link" data-scroll-target="#experimental-results">Experimental Results</a>
   <ul class="collapse">
   <li><a href="#charitable-contribution-made" id="toc-charitable-contribution-made" class="nav-link" data-scroll-target="#charitable-contribution-made">Charitable Contribution Made</a></li>
-  <li><a href="#t-test-and-linear-regression" id="toc-t-test-and-linear-regression" class="nav-link" data-scroll-target="#t-test-and-linear-regression">T-test and Linear Regression</a></li>
-  <li><a href="#probit-regression" id="toc-probit-regression" class="nav-link" data-scroll-target="#probit-regression">Probit Regression</a></li>
   <li><a href="#differences-between-match-rates" id="toc-differences-between-match-rates" class="nav-link" data-scroll-target="#differences-between-match-rates">Differences between Match Rates</a></li>
-  <li><a href="#t-tests-between-match-ratios" id="toc-t-tests-between-match-ratios" class="nav-link" data-scroll-target="#t-tests-between-match-ratios">T-tests Between Match Ratios</a></li>
-  <li><a href="#regression-on-match-ratios" id="toc-regression-on-match-ratios" class="nav-link" data-scroll-target="#regression-on-match-ratios">Regression on Match Ratios</a></li>
-  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation">Interpretation</a></li>
-  <li><a href="#difference-in-response-rates" id="toc-difference-in-response-rates" class="nav-link" data-scroll-target="#difference-in-response-rates">Difference in Response Rates</a></li>
   <li><a href="#size-of-charitable-contribution" id="toc-size-of-charitable-contribution" class="nav-link" data-scroll-target="#size-of-charitable-contribution">Size of Charitable Contribution</a></li>
   </ul></li>
   <li><a href="#simulation-experiment" id="toc-simulation-experiment" class="nav-link" data-scroll-target="#simulation-experiment">Simulation Experiment</a>
@@ -179,7 +170,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#law-of-large-numbers" id="toc-law-of-large-numbers" class="nav-link" data-scroll-target="#law-of-large-numbers">Law of Large Numbers</a></li>
   <li><a href="#central-limit-theorem" id="toc-central-limit-theorem" class="nav-link" data-scroll-target="#central-limit-theorem">Central Limit Theorem</a></li>
   </ul></li>
-  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -498,10 +489,8 @@ Attaching package: 'dplyr'</code></pre>
 <h3 class="anchored" data-anchor-id="balance-test">Balance Test</h3>
 <p>As an ad hoc test of the randomization mechanism, I provide a series of tests that compare aspects of the treatment and control groups to assess whether they are statistically significantly different from one another.</p>
 <p>To assess the success of the randomization, we compare the treatment and control groups on a pre-treatment variable: mrm2, which represents the number of months since the last donation. If the randomization was effective, we would expect no significant differences between the two groups on this variable.</p>
-</section>
-</section>
-<section id="t-test-for-balance" class="level1">
-<h1>T-test for balance</h1>
+<section id="t-test-for-balance" class="level4">
+<h4 class="anchored" data-anchor-id="t-test-for-balance">T-test for balance</h4>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(mrm2 <span class="sc">~</span> treatment, <span class="at">data =</span> df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -520,8 +509,8 @@ mean in group 0 mean in group 1
 </div>
 <p>The two-sample t-test yields a p-value of 0.9049, suggesting that there is no statistically significant difference between the treatment and control groups in terms of their recency of last donation.</p>
 </section>
-<section id="regression-for-balance" class="level1">
-<h1>Regression for balance</h1>
+<section id="regression-for-balance" class="level4">
+<h4 class="anchored" data-anchor-id="regression-for-balance">Regression for balance</h4>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(mrm2 <span class="sc">~</span> treatment, <span class="at">data =</span> df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -548,6 +537,9 @@ F-statistic: 0.01428 on 1 and 50080 DF,  p-value: 0.9049</code></pre>
 </div>
 <p>The linear regression confirms this result. The estimated coefficient on treatment is very small (≈ 0.014) and not statistically significant (p = 0.905), indicating that group assignment does not explain any meaningful variation in donation recency.</p>
 <p>These results align with the balance checks shown in Table 1 of the original paper, which are included to assure readers that the random assignment created comparable groups. This gives us confidence that any differences observed in donation behavior later on can be attributed to the treatment itself.</p>
+</section>
+</section>
+</section>
 <section id="experimental-results" class="level2">
 <h2 class="anchored" data-anchor-id="experimental-results">Experimental Results</h2>
 <section id="charitable-contribution-made" class="level3">
@@ -574,9 +566,8 @@ F-statistic: 0.01428 on 1 and 50080 DF,  p-value: 0.9049</code></pre>
 </div>
 </div>
 <p>This visual shows that the donation rate was noticeably higher among those who received a matching offer.</p>
-</section>
-<section id="t-test-and-linear-regression" class="level3">
-<h3 class="anchored" data-anchor-id="t-test-and-linear-regression">T-test and Linear Regression</h3>
+<section id="t-test-and-linear-regression" class="level4">
+<h4 class="anchored" data-anchor-id="t-test-and-linear-regression">T-test and Linear Regression</h4>
 <p>We now formally test the difference in donation rates using both a two-sample t-test and a simple linear regression.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># T-test</span></span>
@@ -619,8 +610,8 @@ F-statistic: 9.618 on 1 and 50081 DF,  p-value: 0.001927</code></pre>
 </div>
 <p>Both approaches yield consistent results. The t-test produces a statistically significant p-value (~0.0013), and the regression confirms that being in the treatment group increases the likelihood of donating by about 0.4 percentage points. While this may seem small, it’s meaningful given the very low baseline donation rate (~1.8% in the control group). These results replicate Table 2a Panel A in the original paper and demonstrate that even a modest match offer has a real behavioral effect.</p>
 </section>
-<section id="probit-regression" class="level3">
-<h3 class="anchored" data-anchor-id="probit-regression">Probit Regression</h3>
+<section id="probit-regression" class="level4">
+<h4 class="anchored" data-anchor-id="probit-regression">Probit Regression</h4>
 <p>To further validate the result, we run a probit regression where the dependent variable is gave and the independent variable is treatment.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">glm</span>(gave <span class="sc">~</span> treatment, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"probit"</span>), <span class="at">data =</span> df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -648,12 +639,12 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </div>
 <p>The probit model returns a positive and statistically significant coefficient on the treatment variable, indicating that the matching offer significantly increases the probability of donating. This aligns with Table 3, Column 1 of the original study.</p>
 </section>
+</section>
 <section id="differences-between-match-rates" class="level3">
 <h3 class="anchored" data-anchor-id="differences-between-match-rates">Differences between Match Rates</h3>
 <p>In this section, we explore whether the size of the matching ratio affects the likelihood of giving. Specifically, we test whether individuals were more likely to donate when offered a 2:1 or 3:1 match compared to a standard 1:1 match.</p>
-</section>
-<section id="t-tests-between-match-ratios" class="level3">
-<h3 class="anchored" data-anchor-id="t-tests-between-match-ratios">T-tests Between Match Ratios</h3>
+<section id="t-tests-between-match-ratios" class="level4">
+<h4 class="anchored" data-anchor-id="t-tests-between-match-ratios">T-tests Between Match Ratios</h4>
 <p>We begin by running two pairwise t-tests: - The first compares donation rates between those offered a 1:1 match and those offered a 2:1 match. - The second compares 2:1 and 3:1 match groups.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1:1 vs 2:1</span></span>
@@ -689,8 +680,8 @@ sample estimates:
 </div>
 <p>The p-values for both comparisons (0.33 and 0.96, respectively) suggest that differences in match ratios do not produce statistically significant changes in donation behavior. This supports the authors’ observation in the paper that while match presence boosts donations, increasing the match size offers diminishing returns.</p>
 </section>
-<section id="regression-on-match-ratios" class="level3">
-<h3 class="anchored" data-anchor-id="regression-on-match-ratios">Regression on Match Ratios</h3>
+<section id="regression-on-match-ratios" class="level4">
+<h4 class="anchored" data-anchor-id="regression-on-match-ratios">Regression on Match Ratios</h4>
 <p>We also run a regression using indicator variables for 2:1 and 3:1 matches (with 1:1 match as the omitted baseline):</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(gave <span class="sc">~</span> ratio2 <span class="sc">+</span> ratio3, <span class="at">data =</span> df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -729,23 +720,22 @@ F-statistic: 4.117 on 2 and 50080 DF,  p-value: 0.0163</code></pre>
 </div>
 <p>These calculations confirm the regression results. The response rate increases slightly from 1:1 to 2:1, and barely at all from 2:1 to 3:1. This aligns with the authors’ interpretation on page 8, where they suggest that the presence of a match matters more than its size.</p>
 </section>
-<section id="interpretation" class="level3">
-<h3 class="anchored" data-anchor-id="interpretation">Interpretation</h3>
+<section id="interpretation" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation">Interpretation</h4>
 <p>The evidence here suggests that once donors are presented with a match, increasing the match ratio (from 1:1 to 2:1 to 3:1) does not substantially change behavior. This has important implications for nonprofits: just offering a match may be sufficient, and investing in larger match ratios might not yield proportionally better outcomes.</p>
 </section>
-<section id="difference-in-response-rates" class="level3">
-<h3 class="anchored" data-anchor-id="difference-in-response-rates">Difference in Response Rates</h3>
+<section id="difference-in-response-rates" class="level4">
+<h4 class="anchored" data-anchor-id="difference-in-response-rates">Difference in Response Rates</h4>
 <p>Finally, we compare raw response rates directly:</p>
+</section>
 </section>
 <section id="size-of-charitable-contribution" class="level3">
 <h3 class="anchored" data-anchor-id="size-of-charitable-contribution">Size of Charitable Contribution</h3>
-<p>In this subsection, I analyze the effect of the size of matched donation on the size of the charitable contribution.</p>
-<p><em>todo: Calculate a t-test or run a bivariate linear regression of the donation amount on the treatment status. What do we learn from doing this analysis?</em></p>
-<p><em>todo: now limit the data to just people who made a donation and repeat the previous analysis. This regression allows you to analyze how much respondents donate conditional on donating some positive amount. Interpret the regression coefficients – what did we learn? Does the treatment coefficient have a causal interpretation?</em></p>
-<p><em>todo: Make two plot: one for the treatment group and one for the control. Each plot should be a histogram of the donation amounts only among people who donated. Add a red vertical bar or some other annotation to indicate the sample average for each plot.</em></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bivariate regression</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(amount <span class="sc">~</span> treatment, <span class="at">data =</span> df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So far, we’ve focused on whether the matching offer increases the <strong>likelihood</strong> of donating. Now, we turn to the <strong>size</strong> of the donation. Does the presence of a match lead to larger contributions?</p>
+<section id="average-donation-amount-all-participants" class="level4">
+<h4 class="anchored" data-anchor-id="average-donation-amount-all-participants">Average Donation Amount (All Participants)</h4>
+<p>First, we run a regression on the full dataset, comparing average donation amounts between the treatment and control groups. ::: {.cell}</p>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(amount <span class="sc">~</span> treatment, <span class="at">data =</span> df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -766,11 +756,14 @@ Residual standard error: 8.709 on 50081 degrees of freedom
 Multiple R-squared:  6.911e-05, Adjusted R-squared:  4.915e-05 
 F-statistic: 3.461 on 1 and 50081 DF,  p-value: 0.06282</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter for donors only</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>df_givers <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(gave <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Regression on amount among givers</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(amount <span class="sc">~</span> treatment, <span class="at">data =</span> df_givers))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>:::</p>
+<p>The treatment group gives about $0.15 more on average than the control group, but the difference is not statistically significant at the conventional 5% level (p = 0.063). This weak evidence suggests that while more people may give when matched, their contribution amounts do not increase meaningfully.</p>
+</section>
+<section id="average-donation-among-donors-only" class="level4">
+<h4 class="anchored" data-anchor-id="average-donation-among-donors-only">Average Donation Among Donors Only</h4>
+<p>Next, we restrict our analysis to only those who donated (gave == 1) to assess whether matched donors give more conditional on giving. ::: {.cell}</p>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>df_givers <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(gave <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(amount <span class="sc">~</span> treatment, <span class="at">data =</span> df_givers))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -791,7 +784,14 @@ Residual standard error: 41.83 on 1032 degrees of freedom
 Multiple R-squared:  0.0003268, Adjusted R-squared:  -0.0006419 
 F-statistic: 0.3374 on 1 and 1032 DF,  p-value: 0.5615</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram for treatment</span></span>
+<p>:::</p>
+<p>Among donors, the treatment effect disappears entirely. In fact, treated donors gave $1.67 less on average than the control group — though again, this result is not statistically significant (p = 0.56). This suggests that while match offers may encourage more people to give, they don’t necessarily give more money once they do.</p>
+</section>
+<section id="donation-amount-distributions" class="level4">
+<h4 class="anchored" data-anchor-id="donation-amount-distributions">Donation Amount Distributions</h4>
+<p>To visualize the donation behavior of those who gave, we plot histograms of donation amounts for the treatment and control groups. The red vertical line in each plot represents the group’s average donation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Treatment group</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_givers <span class="sc">%&gt;%</span> <span class="fu">filter</span>(treatment <span class="sc">==</span> <span class="dv">1</span>), <span class="fu">aes</span>(<span class="at">x =</span> amount)) <span class="sc">+</span></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">10</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>) <span class="sc">+</span></span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(amount)), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
@@ -800,11 +800,11 @@ F-statistic: 0.3374 on 1 and 1032 DF,  p-value: 0.5615</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="hw1_questions_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="hw1_questions_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram for control</span></span>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Control group</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_givers <span class="sc">%&gt;%</span> <span class="fu">filter</span>(treatment <span class="sc">==</span> <span class="dv">0</span>), <span class="fu">aes</span>(<span class="at">x =</span> amount)) <span class="sc">+</span></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">10</span>, <span class="at">fill =</span> <span class="st">"darkorange"</span>) <span class="sc">+</span></span>
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(amount)), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
@@ -813,21 +813,27 @@ F-statistic: 0.3374 on 1 and 1032 DF,  p-value: 0.5615</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="hw1_questions_files/figure-html/unnamed-chunk-10-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="hw1_questions_files/figure-html/unnamed-chunk-12-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>These plots show that the donation distributions are quite similar. Both are right-skewed (most people give small amounts), and the average donation is roughly the same across groups.</p>
+</section>
+<section id="interpretation-1" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation-1">Interpretation</h4>
+<p>This analysis reinforces a key idea from the original study: matching offers are effective at increasing participation, but not necessarily donation size. While the psychological nudge of a match encourages people to give, it doesn’t seem to change how much they give once they’ve decided to contribute. Also, because these results come from an observational regression, and giving is influenced by many factors, the treatment coefficient should not be interpreted as causal without stronger identification assumptions.</p>
+</section>
 </section>
 </section>
 <section id="simulation-experiment" class="level2">
 <h2 class="anchored" data-anchor-id="simulation-experiment">Simulation Experiment</h2>
-<p>As a reminder of how the t-statistic “works,” in this section I use simulation to demonstrate the Law of Large Numbers and the Central Limit Theorem.</p>
-<p>Suppose the true distribution of respondents who do not get a charitable donation match is Bernoulli with probability p=0.018 that a donation is made.</p>
-<p>Further suppose that the true distribution of respondents who do get a charitable donation match of any size is Bernoulli with probability p=0.022 that a donation is made.</p>
+<p>To reinforce our understanding of the t-statistic and the foundations of hypothesis testing, we run a simulation to illustrate the <strong>Law of Large Numbers</strong>. The idea is to observe how the difference in sample means behaves as the number of simulations grows.</p>
+<p>Suppose we know the following “true” probabilities of donating: - Control group (no match): 1.8% (<code>p = 0.018</code>) - Treatment group (match offer): 2.2% (<code>p = 0.022</code>)</p>
+<p>We’ll simulate thousands of draws from each group and track how the average difference evolves.</p>
 <section id="law-of-large-numbers" class="level3">
 <h3 class="anchored" data-anchor-id="law-of-large-numbers">Law of Large Numbers</h3>
-<p><em>to do: Make a plot like those on slide 43 from our first class and explain the plot to the reader. To do this, you will simulate 100,00 draws from the control distribution and 10,000 draws from the treatment distribution. You’ll then calculate a vector of 10,000 differences, and then you’ll plot the cumulative average of that vector of differences. Comment on whether the cumulative average approaches the true difference in means.</em></p>
+<p>The Law of Large Numbers (LLN) tells us that as the number of observations increases, the sample average will converge to the true population mean. To visualize this, we simulate: - 100,000 individuals from the control distribution - 10,000 individuals from the treatment distribution (drawn with replacement from the control group) - A vector of 10,000 differences in donation outcomes - The cumulative average of these differences</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>ctrl <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">100000</span>, <span class="dv">1</span>, <span class="fl">0.018</span>)</span>
@@ -835,45 +841,71 @@ F-statistic: 0.3374 on 1 and 1032 DF,  p-value: 0.5615</code></pre>
 <span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>diffs <span class="ot">&lt;-</span> treat <span class="sc">-</span> <span class="fu">sample</span>(ctrl, <span class="dv">10000</span>)</span>
 <span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>cum_avg <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(diffs)<span class="sc">/</span><span class="fu">seq_along</span>(diffs)</span>
 <span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cum_avg, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">ylab =</span> <span class="st">"Cumulative Avg Diff"</span>, <span class="at">main =</span> <span class="st">"LLN: Cumulative Difference"</span>, <span class="at">xlab =</span> <span class="st">"Simulations"</span>)</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.004</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cum_avg, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">ylab =</span> <span class="st">"Cumulative Avg Diff"</span>,</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"LLN: Cumulative Difference"</span>, <span class="at">xlab =</span> <span class="st">"Simulations"</span>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.004</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="hw1_questions_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="hw1_questions_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>The red dashed line represents the true difference in donation probabilities: 0.022 - 0.018 = 0.004. As the number of simulations increases, the cumulative average converges toward this value — beautifully demonstrating the Law of Large Numbers in action.</p>
+<section id="interpretation-2" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation-2">Interpretation</h4>
+<p>This plot helps explain why, in large datasets, sample averages become reliable estimates of population parameters. It also reminds us that random variation in small samples can be misleading, but that variation smooths out as more data is collected — a core principle behind statistical inference.</p>
+</section>
 </section>
 <section id="central-limit-theorem" class="level3">
 <h3 class="anchored" data-anchor-id="central-limit-theorem">Central Limit Theorem</h3>
-<p><em>to do: Make 4 histograms like those on slide 44 from our first class at sample sizes 50, 200, 500, and 1000 and explain these plots to the reader. To do this for a sample size of e.g.&nbsp;50, take 50 draws from each of the control and treatment distributions, and calculate the average difference between those draws. Then repeat that process 999 more times so that you have 1000 averages. Plot the histogram of those averages. Comment on whether zero is in the “middle” of the distribution or whether it’s in the “tail.”</em></p>
-<div class="cell">
+<p>To complement the Law of Large Numbers, we now illustrate the <strong>Central Limit Theorem (CLT)</strong> using simulation. While LLN tells us the average converges to the truth, the CLT tells us <strong>what the distribution of those averages looks like</strong> — specifically, that they tend to follow a normal (bell-shaped) distribution as the sample size increases.</p>
+<section id="simulation-setup" class="level4">
+<h4 class="anchored" data-anchor-id="simulation-setup">Simulation Setup</h4>
+<p>We simulate differences in donation rates between treatment and control groups using four different sample sizes: 50, 200, 500, and 1000. For each size: - We draw <code>n</code> Bernoulli observations from both the treatment (<code>p = 0.022</code>) and control (<code>p = 0.018</code>) distributions. - We calculate the difference in sample means. - We repeat this 1,000 times to build a distribution of mean differences. ::: {.cell}</p>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>sample_sizes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">200</span>, <span class="dv">500</span>, <span class="dv">1000</span>)</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (n <span class="cf">in</span> sample_sizes) {</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  diffs <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    m_treat <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.022</span>))</span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    m_ctrl <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.018</span>))</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    m_treat <span class="sc">-</span> m_ctrl</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  })</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hist</span>(diffs, <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Sample size ="</span>, n), <span class="at">xlab =</span> <span class="st">"Mean Differences"</span>)</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))  <span class="co"># 2x2 grid of plots</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (n <span class="cf">in</span> sample_sizes) {</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  diffs <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    m_treat <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.022</span>))</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    m_ctrl <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.018</span>))</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    m_treat <span class="sc">-</span> m_ctrl</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hist</span>(diffs,</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Sample size ="</span>, n),</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">xlab =</span> <span class="st">"Mean Differences"</span>,</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="st">"lightblue"</span>,</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="st">"white"</span>)</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="hw1_questions_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="hw1_questions_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-
-
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))  <span class="co"># reset layout</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>:::</p>
+</section>
+<section id="interpretation-3" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation-3">Interpretation</h4>
+<p>These four histograms provide a striking visual of the Central Limit Theorem in action:</p>
+<ul>
+<li><p>Small samples (n = 50) produce wider, bumpier distributions — lots of variation and a high chance of sampling noise.</p></li>
+<li><p>As sample size increases (n = 200, 500, 1000), the distributions become smoother and more bell-shaped, and they center more tightly around the true difference (0.004).</p></li>
+</ul>
+<p>In all cases, the peak of the histogram tends to cluster near the actual expected difference between treatment and control. This shows how even when dealing with binary outcomes (like whether someone donates), sample averages will behave predictably with enough data.</p>
 </section>
 </section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>This replication of Karlan and List’s (2007) field experiment confirms several of their key findings: simply offering a matching donation significantly increases the likelihood that someone donates, while the specific size of the match (1:1, 2:1, 3:1) has little additional impact. Moreover, while more people give when a match is present, the size of their donation does not appear to increase — suggesting the match offer primarily affects participation, not generosity. Through simulation, we also demonstrated fundamental statistical principles that help explain why their findings hold in large samples. Altogether, this analysis reinforces the power of simple behavioral nudges in fundraising, and highlights the importance of both thoughtful experimental design and rigorous statistical interpretation in social science research.</p>
+
+
 </section>
 
 </main> <!-- /main -->
