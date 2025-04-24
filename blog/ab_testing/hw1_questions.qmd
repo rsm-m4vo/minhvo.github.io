@@ -11,7 +11,7 @@ format: html
 
 Dean Karlan at Yale and John List at the University of Chicago conducted a field experiment to test the effectiveness of different fundraising letters. They sent out 50,000 fundraising letters to potential donors, randomly assigning each letter to one of three treatments: a standard letter, a matching grant letter, or a challenge grant letter. They published the results of this experiment in the _American Economic Review_ in 2007. The article and supporting data are available from the [AEA website](https://www.aeaweb.org/articles?id=10.1257/aer.97.5.1774) and from Innovations for Poverty Action as part of [Harvard's Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/27853&version=4.2).
 
-_to do: expand on the description of the experiment._
+In this experiment, Dean Karlan and John List wanted to understand what makes people more likely to donate to a cause, specifically, whether offering to match donations actually works. They mailed out 50,000 fundraising letters to past donors of a nonprofit, randomly assigning each recipient to one of a few different versions. Some people got a standard letter, while others were told their donation would be matched — either dollar-for-dollar (1:1), doubled (2:1), or tripled (3:1). A few versions also included different thresholds for how much the matching donor would contribute in total. By comparing how people responded across these groups, the researchers could see not just whether matching worked, but whether the size or structure of the match made a difference. As it would turn out, even just offering a match, any match, made people more likely to give.
 
 This project seeks to replicate their results.
 
@@ -20,9 +20,7 @@ This project seeks to replicate their results.
 
 ### Description
 
-_todo: Read the data into R/Python and describe the data_
-
-We begin by loading the dataset provided by the authors. The dataset is stored in the `data/` directory and contains variables related to donor demographics, past behavior, and treatment assignments.
+We begin by loading the dataset using the haven package, which allows us to read Stata .dta files into R. The dataset contains 50,083 observations, each representing an individual who received a fundraising letter. It includes information on treatment assignment, match ratios, suggested donation amounts, previous giving behavior, and demographic characteristics.
 
 ```{r}
 library(haven)
@@ -32,8 +30,9 @@ library(ggplot2)
 # Load data
 df <- read_dta("../../data/karlan_list_2007.dta")
 
-# Preview the data
-summary(df)
+df %>%
+  select(treatment, gave, amount, mrm2, female, ask, hpa) %>%
+  summary()
 
 ```
 
