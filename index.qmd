@@ -1,14 +1,15 @@
 ---
 title: "Minh Vo"
-image: "images/download.jpg"
+image: "images/1683168470538.jpeg"
 about:
   template: jolla
   links: 
     - icon: envelope
-      href: mailto:m4vo@ucsd.edu
+      href: "mailto:m4vo@ucsd.edu"
     - icon: linkedin
-      href: www.linkedin.com/in/minh-vo-msba
+      href: "https://www.linkedin.com/in/minh-vo-msba"
 ---
 
 
-Here is a paragraph about me!
+I’m a Master of Science in Business Analytics candidate at UC San Diego’s Rady School of Management, with a background in Business Economics and a minor in Cognitive Science. My experience spans teaching, procurement analysis, and academic research, most recently assisting faculty across multiple upper-division management courses and leading a UCSD-funded research project on historical land use using QGIS and STATA. With strong technical skills in R, Python, SQL, and STATA, I’m passionate about turning data into insights that drive strategic decision-making.
+
