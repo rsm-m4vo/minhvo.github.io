@@ -19,5 +19,11 @@
   },
   "blog/ab_testing/hw1_questions.qmd": {
     "hw1_questions.html": "b5e3b572"
+  },
+  "blog/ab_testing/hw2_questions.qmd": {
+    "hw2_questions.html": "878b4965"
+  },
+  "blog/mle/hw2_questions.qmd": {
+    "hw2_questions.html": "5eeaf182"
   }
 }
