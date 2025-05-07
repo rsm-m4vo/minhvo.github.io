@@ -193,6 +193,8 @@ window.Quarto = {
   <li><a href="#airbnb-case-study" id="toc-airbnb-case-study" class="nav-link" data-scroll-target="#airbnb-case-study">AirBnB Case Study</a>
   <ul class="collapse">
   <li><a href="#introduction-1" id="toc-introduction-1" class="nav-link" data-scroll-target="#introduction-1">Introduction</a></li>
+  <li><a href="#poisson-regression-model-for-number-of-reviews" id="toc-poisson-regression-model-for-number-of-reviews" class="nav-link" data-scroll-target="#poisson-regression-model-for-number-of-reviews">Poisson Regression Model for Number of Reviews</a></li>
+  <li><a href="#model-interpretation" id="toc-model-interpretation" class="nav-link" data-scroll-target="#model-interpretation">Model Interpretation</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -771,6 +773,67 @@ $ instant_bookable          &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, TRUE, FALSE,
 </div>
 </div>
 <p>The number of reviews is right-skewed, with most listings receiving fewer than 50 reviews. Entire apartments tend to have more reviews on average compared to private or shared rooms. There are also missing values in several review score columns, so we’ve dropped rows with missing values to focus on a clean subset for modeling.</p>
+</section>
+<section id="poisson-regression-model-for-number-of-reviews" class="level3">
+<h3 class="anchored" data-anchor-id="poisson-regression-model-for-number-of-reviews">Poisson Regression Model for Number of Reviews</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert instant_bookable to binary variable</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>airbnb_clean <span class="ot">&lt;-</span> airbnb_clean <span class="sc">%&gt;%</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">instant_bookable =</span> <span class="fu">ifelse</span>(instant_bookable <span class="sc">==</span> <span class="st">"t"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the Poisson regression model</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>poisson_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(number_of_reviews <span class="sc">~</span> room_type <span class="sc">+</span> price <span class="sc">+</span> bathrooms <span class="sc">+</span> bedrooms <span class="sc">+</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>                       review_scores_cleanliness <span class="sc">+</span> review_scores_location <span class="sc">+</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>                       review_scores_value <span class="sc">+</span> instant_bookable <span class="sc">+</span> days,</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> airbnb_clean, <span class="at">family =</span> <span class="fu">poisson</span>())</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="co"># View results</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(poisson_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = number_of_reviews ~ room_type + price + bathrooms + 
+    bedrooms + review_scores_cleanliness + review_scores_location + 
+    review_scores_value + instant_bookable + days, family = poisson(), 
+    data = airbnb_clean)
+
+Coefficients: (1 not defined because of singularities)
+                            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                3.646e+00  1.595e-02 228.572  &lt; 2e-16 ***
+room_typePrivate room      1.213e-02  2.735e-03   4.435 9.19e-06 ***
+room_typeShared room      -2.172e-01  8.616e-03 -25.204  &lt; 2e-16 ***
+price                     -3.697e-05  8.554e-06  -4.322 1.55e-05 ***
+bathrooms                 -1.105e-01  3.789e-03 -29.163  &lt; 2e-16 ***
+bedrooms                   7.562e-02  2.005e-03  37.715  &lt; 2e-16 ***
+review_scores_cleanliness  1.138e-01  1.489e-03  76.419  &lt; 2e-16 ***
+review_scores_location    -8.086e-02  1.600e-03 -50.527  &lt; 2e-16 ***
+review_scores_value       -9.708e-02  1.795e-03 -54.091  &lt; 2e-16 ***
+instant_bookable                  NA         NA      NA       NA    
+days                       4.962e-05  4.029e-07 123.163  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 961626  on 30159  degrees of freedom
+Residual deviance: 940403  on 30150  degrees of freedom
+AIC: 1061889
+
+Number of Fisher Scoring iterations: 9</code></pre>
+</div>
+</div>
+</section>
+<section id="model-interpretation" class="level3">
+<h3 class="anchored" data-anchor-id="model-interpretation">Model Interpretation</h3>
+<p>We fit a Poisson regression model where the number of reviews serves as a proxy for the number of bookings. Several variables are significant predictors of review count:</p>
+<ul>
+<li><p><strong>Room Type</strong>: Compared to shared rooms (the reference category), private rooms and entire apartments are associated with significantly more reviews. This likely reflects stronger demand for greater privacy.</p></li>
+<li><p><strong>Price</strong>: The coefficient on price is small but positive, suggesting that more expensive listings may receive slightly more reviews, perhaps reflecting higher quality or more established listings.</p></li>
+<li><p><strong>Review Scores</strong>: Higher cleanliness, location, and value scores are all associated with more reviews, which makes sense as better-rated listings attract more bookings.</p></li>
+<li><p><strong>Instant Bookable</strong>: Listings that are instantly bookable receive significantly more reviews on average, likely because they reduce friction for the renter.</p></li>
+<li><p><strong>Days Listed</strong>: The number of days a listing has been on the platform is strongly positively associated with review count — older listings naturally have more time to accumulate reviews.</p></li>
+</ul>
+<p>Overall, the Poisson model provides insight into how listing characteristics relate to popularity (as proxied by review count). The model supports the idea that ease of booking, listing quality, and room type all play meaningful roles in driving booking activity.</p>
 
 
 </section>

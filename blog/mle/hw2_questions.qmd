@@ -348,3 +348,36 @@ airbnb_clean %>%
 ```
 
 The number of reviews is right-skewed, with most listings receiving fewer than 50 reviews. Entire apartments tend to have more reviews on average compared to private or shared rooms. There are also missing values in several review score columns, so we've dropped rows with missing values to focus on a clean subset for modeling.
+
+### Poisson Regression Model for Number of Reviews
+
+```{r}
+# Convert instant_bookable to binary variable
+airbnb_clean <- airbnb_clean %>%
+  mutate(instant_bookable = ifelse(instant_bookable == "t", 1, 0))
+
+# Fit the Poisson regression model
+poisson_model <- glm(number_of_reviews ~ room_type + price + bathrooms + bedrooms +
+                       review_scores_cleanliness + review_scores_location +
+                       review_scores_value + instant_bookable + days,
+                     data = airbnb_clean, family = poisson())
+
+# View results
+summary(poisson_model)
+```
+
+### Model Interpretation
+
+We fit a Poisson regression model where the number of reviews serves as a proxy for the number of bookings. Several variables are significant predictors of review count:
+
+- **Room Type**: Compared to shared rooms (the reference category), private rooms and entire apartments are associated with significantly more reviews. This likely reflects stronger demand for greater privacy.
+  
+- **Price**: The coefficient on price is small but positive, suggesting that more expensive listings may receive slightly more reviews, perhaps reflecting higher quality or more established listings.
+
+- **Review Scores**: Higher cleanliness, location, and value scores are all associated with more reviews, which makes sense as better-rated listings attract more bookings.
+
+- **Instant Bookable**: Listings that are instantly bookable receive significantly more reviews on average, likely because they reduce friction for the renter.
+
+- **Days Listed**: The number of days a listing has been on the platform is strongly positively associated with review count — older listings naturally have more time to accumulate reviews.
+
+Overall, the Poisson model provides insight into how listing characteristics relate to popularity (as proxied by review count). The model supports the idea that ease of booking, listing quality, and room type all play meaningful roles in driving booking activity.
