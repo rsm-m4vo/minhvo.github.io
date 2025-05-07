@@ -17,35 +17,164 @@ However, Blueprinty has collected data on 1,500 mature (non-startup) engineering
 
 ### Data
 
-_todo: Read in data._
+We begin by loading the Blueprinty dataset, which includes 1,500 engineering firms. For each firm, we have the number of patents awarded over the past 5 years, whether or not the firm uses Blueprinty's software, and basic firm characteristics such as region and age.
 
-_todo: Compare histograms and means of number of patents by customer status. What do you observe?_
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+# Load the dataset
+df <- read_csv("../../data/blueprinty.csv")
+
+# Preview
+glimpse(df)
+summary(df)
+```
+```{r}
+# Compare average patents by customer status
+df %>%
+  group_by(iscustomer) %>%
+  summarise(mean_patents = mean(patents),
+            n = n())
+
+# Histogram of patents by customer status
+ggplot(df, aes(x = patents, fill = factor(iscustomer))) +
+  geom_histogram(binwidth = 1, position = "dodge", color = "white") +
+  labs(x = "Number of Patents", y = "Count", fill = "Customer Status") +
+  scale_fill_manual(values = c("darkorange", "steelblue"), 
+                    labels = c("Non-Customer", "Customer")) +
+  theme_minimal()
+```
+
+From the summary statistics and histogram, we observe that firms using Blueprinty's software tend to have a higher average number of patents compared to those who do not. The distribution is right-skewed for both groups, but the customer group appears to have more firms with higher patent counts. While this is suggestive of a possible positive effect, further analysis using a model like Poisson regression will help us better assess the relationship while controlling for other factors.
 
 Blueprinty customers are not selected at random. It may be important to account for systematic differences in the age and regional location of customers vs non-customers.
 
-_todo: Compare regions and ages by customer status. What do you observe?_
+```{r}
+# Compare average age by customer status
+df %>%
+  group_by(iscustomer) %>%
+  summarise(mean_age = mean(age),
+            median_age = median(age),
+            sd_age = sd(age),
+            n = n())
 
+# Boxplot of age by customer status
+ggplot(df, aes(x = factor(iscustomer), y = age, fill = factor(iscustomer))) +
+  geom_boxplot() +
+  labs(x = "Customer Status", y = "Firm Age (Years)", fill = "Customer Status") +
+  scale_fill_manual(values = c("darkorange", "steelblue"),
+                    labels = c("Non-Customer", "Customer")) +
+  scale_x_discrete(labels = c("Non-Customer", "Customer")) +
+  theme_minimal()
+
+# Compare region distributions
+table(df$region, df$iscustomer)
+
+# Region as barplot
+ggplot(df, aes(x = region, fill = factor(iscustomer))) +
+  geom_bar(position = "fill") +
+  labs(x = "Region", y = "Proportion", fill = "Customer Status") +
+  scale_fill_manual(values = c("darkorange", "steelblue"),
+                    labels = c("Non-Customer", "Customer")) +
+  theme_minimal()
+```
+
+When comparing firm age, we see that Blueprinty customers tend to be older on average than non-customers. This suggests that more established firms may be more likely to invest in specialized software. In terms of regional distribution, the stacked bar chart shows that Blueprinty customers are not evenly spread across regions — some regions have a higher concentration of customers than others. These differences in age and region could be driving part of the observed difference in patent counts, so it will be important to control for them in our regression model.
 
 ### Estimation of Simple Poisson Model
 
 Since our outcome variable of interest can only be small integer values per a set unit of time, we can use a Poisson density to model the number of patents awarded to each engineering firm over the last 5 years. We start by estimating a simple Poisson model via Maximum Likelihood.
 
-_todo: Write down mathematically the likelihood for_ $Y \sim \text{Poisson}(\lambda)$. Note that $f(Y|\lambda) = e^{-\lambda}\lambda^Y/Y!$.
+### Likelihood Function
 
-_todo: Code the likelihood (or log-likelihood) function for the Poisson model. This is a function of lambda and Y. For example:_
+For a Poisson random variable \( Y \sim \text{Poisson}(\lambda) \), the probability mass function is:
 
-```
-poisson_loglikelihood <- function(lambda, Y){
-   ...
+$$
+f(Y \mid \lambda) = \frac{e^{-\lambda} \lambda^Y}{Y!}
+$$
+
+Given a dataset of \( n \) independent observations \( Y_1, Y_2, \ldots, Y_n \), the likelihood function is:
+
+$$
+L(\lambda) = \prod_{i=1}^{n} \frac{e^{-\lambda} \lambda^{Y_i}}{Y_i!}
+$$
+
+Taking the logarithm of the likelihood gives the log-likelihood function:
+
+$$
+\log L(\lambda) = \sum_{i=1}^{n} \left( -\lambda + Y_i \log \lambda - \log(Y_i!) \right)
+$$
+
+
+```{r}
+# Define a Poisson log-likelihood function
+poisson_loglikelihood <- function(lambda, Y) {
+  if (lambda <= 0) return(-Inf)  # log of 0 or negative not allowed
+  sum(-lambda + Y * log(lambda) - lfactorial(Y))
 }
+
+# Example: Evaluate log-likelihood at lambda = 2 for some patent counts
+sample_Y <- c(0, 1, 3, 2, 0, 5, 1)
+poisson_loglikelihood(lambda = 2, Y = sample_Y)
 ```
 
-_todo: Use your function to plot lambda on the horizontal axis and the likelihood (or log-likelihood) on the vertical axis for a range of lambdas (use the observed number of patents as the input for Y)._
+```{r}
+# Extract Y (number of patents)
+Y <- df$patents
 
-_todo: If you're feeling mathematical, take the first derivative of your likelihood or log-likelihood, set it equal to zero and solve for lambda. You will find lambda_mle is Ybar, which "feels right" because the mean of a Poisson distribution is lambda._
+# Create a sequence of lambda values to test
+lambda_vals <- seq(0.1, 10, length.out = 200)
 
-_todo: Find the MLE by optimizing your likelihood function with optim() in R or sp.optimize() in Python._
+# Calculate log-likelihoods
+loglik_vals <- sapply(lambda_vals, function(lam) poisson_loglikelihood(lam, Y))
 
+# Plot
+plot(lambda_vals, loglik_vals, type = "l", col = "steelblue",
+     xlab = expression(lambda), ylab = "Log-Likelihood",
+     main = "Poisson Log-Likelihood over Lambda")
+abline(v = mean(Y), col = "red", lty = 2)  # show where sample mean falls
+```
+
+### Analytical Derivation of the MLE
+
+The log-likelihood function for \( n \) independent observations from a Poisson distribution is:
+
+$$
+\log L(\lambda) = \sum_{i=1}^{n} \left( -\lambda + Y_i \log \lambda - \log(Y_i!) \right)
+$$
+
+Taking the derivative with respect to \( \lambda \):
+
+$$
+\frac{d}{d\lambda} \log L(\lambda) = \sum_{i=1}^{n} \left( -1 + \frac{Y_i}{\lambda} \right)
+= -n + \frac{\sum Y_i}{\lambda}
+$$
+
+Setting this equal to 0 and solving for \( \lambda \), we get:
+
+$$
+\lambda_{MLE} = \bar{Y}
+$$
+
+This confirms our intuition: the MLE for a Poisson mean is simply the sample mean.
+
+```{r}
+
+# Negative log-likelihood for use in minimization
+neg_loglik <- function(lambda) {
+  -poisson_loglikelihood(lambda, Y)
+}
+
+# Optimize using the sample mean as starting point
+optim_result <- optim(par = mean(Y), fn = neg_loglik, method = "Brent", lower = 0.01, upper = 20)
+
+# View result
+optim_result$par  # MLE
+```
+
+The plot of the log-likelihood function shows a clear peak, which occurs near the average number of patents awarded across firms in the dataset. By taking the derivative of the log-likelihood and solving for the value that maximizes it, we find that the maximum likelihood estimate (MLE) for the Poisson rate parameter is simply the sample mean. This makes intuitive sense, since in a Poisson distribution the mean and variance are both equal to the rate parameter. Using numerical optimization confirms this result: the value that maximizes the log-likelihood is nearly identical to the observed average number of patents.
 
 ### Estimation of Poisson Regression Model
 
