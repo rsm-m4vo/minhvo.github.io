@@ -180,24 +180,114 @@ The plot of the log-likelihood function shows a clear peak, which occurs near th
 
 Next, we extend our simple Poisson model to a Poisson Regression Model such that $Y_i = \text{Poisson}(\lambda_i)$ where $\lambda_i = \exp(X_i'\beta)$. The interpretation is that the success rate of patent awards is not constant across all firms ($\lambda$) but rather is a function of firm characteristics $X_i$. Specifically, we will use the covariates age, age squared, region, and whether the firm is a customer of Blueprinty.
 
-_todo: Update your likelihood or log-likelihood function with an additional argument to take in a covariate matrix X. Also change the parameter of the model from lambda to the beta vector. In this model, lambda must be a positive number, so we choose the inverse link function g_inv() to be exp() so that_ $\lambda_i = e^{X_i'\beta}$. _For example:_
-
-```
-poisson_regression_likelihood <- function(beta, Y, X){
-   ...
+```{r}
+# Poisson regression log-likelihood
+poisson_regression_loglikelihood <- function(beta, Y, X) {
+  lambda <- exp(X %*% beta)  # vector of lambda_i values
+  loglik <- sum(-lambda + Y * (X %*% beta) - lfactorial(Y))
+  return(loglik)
 }
+
 ```
 
-_todo: Use your function along with R's optim() or Python's sp.optimize() to find the MLE vector and the Hessian of the Poisson model with covariates. Specifically, the first column of X should be all 1's to enable a constant term in the model, and the subsequent columns should be age, age squared, binary variables for all but one of the regions, and the binary customer variable. Use the Hessian to find standard errors of the beta parameter estimates and present a table of coefficients and standard errors._
+```{r}
+patents ~ age + I(age^2) + region + iscustomer
 
-_todo: Check your results using R's glm() function or Python sm.GLM() function._
+# Create model matrix (X) and outcome (Y)
+X <- model.matrix(~ age + I(age^2) + region + iscustomer, data = df)
+Y <- df$patents
 
-_todo: Interpret the results._ 
+# Try initial betas = 0
+beta_start <- rep(0, ncol(X))
 
-_todo: What do you conclude about the effect of Blueprinty's software on patent success? Because the beta coefficients are not directly interpretable, it may help to create two fake datasets: X_0 and X_1 where X_0 is the X data but with iscustomer=0 for every observation and X_1 is the X data but with iscustomer=1 for every observation. Then, use X_0 and your fitted model to get the vector of predicted number of patents (y_pred_0) for every firm in the dataset, and use X_1 to get Y_pred_1 for every firm. Then subtract y_pred_1 minus y_pred_0 and take the average of that vector of differences._
+# Maximize log-likelihood
+neg_loglik <- function(beta) -poisson_regression_loglikelihood(beta, Y, X)
 
+# Run optimization
+result <- optim(beta_start, neg_loglik, method = "BFGS", control = list(maxit = 1000))
 
+# View estimated coefficients
+result$par
+```
 
+In this regression-based Poisson model, we allow the expected number of patents awarded to vary across firms based on covariates. The expected value for each firm is modeled as an exponential function of the firm’s characteristics, ensuring that predicted counts remain positive. We include firm age, age squared, regional dummies, and customer status as predictors. The model is estimated by maximizing the log-likelihood function numerically.
+
+```{r}
+# Create the model matrix manually
+df$agesq <- df$age^2
+X <- model.matrix(~ age + agesq + region + iscustomer, data = df)
+Y <- df$patents
+
+# Define log-likelihood
+poisson_regression_loglikelihood <- function(beta, Y, X) {
+  lambda <- exp(X %*% beta)
+  sum(-lambda + Y * (X %*% beta) - lfactorial(Y))
+}
+
+# Negative log-likelihood for optimization
+neg_loglik <- function(beta) -poisson_regression_loglikelihood(beta, Y, X)
+
+# Initial guess
+beta_start <- rep(0, ncol(X))
+
+# Maximize using optim
+mle_result <- optim(par = beta_start,
+                    fn = neg_loglik,
+                    method = "BFGS",
+                    hessian = TRUE,
+                    control = list(maxit = 1000))
+
+# Extract coefficients
+beta_hat <- mle_result$par
+
+# Compute standard errors from Hessian
+hessian <- mle_result$hessian
+vcov <- solve(hessian)  # variance-covariance matrix
+se <- sqrt(diag(vcov))
+
+# Combine results into a table
+results_table <- data.frame(
+  Term = colnames(X),
+  Estimate = round(beta_hat, 4),
+  StdError = round(se, 4)
+)
+
+results_table
+```
+
+```{r}
+glm_result <- glm(patents ~ age + I(age^2) + region + iscustomer,
+                  data = df, family = poisson(link = "log"))
+
+summary(glm_result)
+```
+
+The Poisson regression results suggest that firm age and being a Blueprinty customer are significant predictors of patent counts. The customer coefficient is positive and statistically significant, indicating that — controlling for age and region — Blueprinty users tend to receive more patents. Age has a nonlinear effect: the positive coefficient on age and negative coefficient on age squared suggests that patent productivity increases with firm age up to a point, then declines. Regional effects vary, with some regions having significantly different baseline patenting levels. These results support the marketing team’s hypothesis, but causality should be interpreted cautiously due to potential selection bias in who becomes a customer.
+
+```{r}
+# Predicted values using fitted beta_hat from optim()
+# (assumes you've already run your optimization and stored beta_hat)
+
+# Create counterfactual design matrices
+X_0 <- X
+X_0[, "iscustomer"] <- 0
+
+X_1 <- X
+X_1[, "iscustomer"] <- 1
+
+# Predicted counts under both scenarios
+y_pred_0 <- exp(X_0 %*% beta_hat)
+y_pred_1 <- exp(X_1 %*% beta_hat)
+
+# Difference in predicted patent counts
+pred_diff <- y_pred_1 - y_pred_0
+
+# Average treatment effect of being a Blueprinty customer
+avg_effect <- mean(pred_diff)
+avg_effect
+```
+
+To quantify the effect of Blueprinty’s software on patenting success, we computed predicted patent counts for each firm under two hypothetical scenarios: one where no firm used the software, and one where all firms did. The average difference in predicted patents per firm was approximately r round(avg_effect, 3), indicating that — on average — Blueprinty customers are expected to receive that many more patents over a five-year period than non-customers, all else equal. While this supports the marketing team’s claim, we emphasize that the relationship is correlational, not necessarily causal.
 
 ## AirBnB Case Study
 
@@ -225,9 +315,36 @@ AirBnB is a popular platform for booking short-term rentals. In March 2017, stud
 ::::
 
 
-_todo: Assume the number of reviews is a good proxy for the number of bookings. Perform some exploratory data analysis to get a feel for the data, handle or drop observations with missing values on relevant variables, build one or more models (e.g., a poisson regression model for the number of bookings as proxied by the number of reviews), and interpret model coefficients to describe variation in the number of reviews as a function of the variables provided._
+```{r}
+# Load data
+airbnb <- read_csv("../../data/airbnb.csv")
 
+# Quick look at structure and missingness
+glimpse(airbnb)
+summary(airbnb)
 
+# Drop observations with missing values in key variables
+airbnb_clean <- airbnb %>%
+  select(number_of_reviews, room_type, bathrooms, bedrooms, price,
+         review_scores_cleanliness, review_scores_location, review_scores_value,
+         instant_bookable, days) %>%
+  na.omit()
+```
 
+```{r}
+# Distribution of reviews (proxy for bookings)
+ggplot(airbnb_clean, aes(x = number_of_reviews)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "white") +
+  xlim(0, 100) +  # cap for visibility
+  labs(title = "Distribution of Number of Reviews", x = "Number of Reviews", y = "Count") +
+  theme_minimal()
 
+# Average reviews by room type
+airbnb_clean %>%
+  group_by(room_type) %>%
+  summarise(mean_reviews = mean(number_of_reviews),
+            median_reviews = median(number_of_reviews),
+            n = n())
+```
 
+The number of reviews is right-skewed, with most listings receiving fewer than 50 reviews. Entire apartments tend to have more reviews on average compared to private or shared rooms. There are also missing values in several review score columns, so we've dropped rows with missing values to focus on a clean subset for modeling.

@@ -475,14 +475,153 @@ L(\lambda) = \prod_{i=1}^{n} \frac{e^{-\lambda} \lambda^{Y_i}}{Y_i!}
 <section id="estimation-of-poisson-regression-model" class="level3">
 <h3 class="anchored" data-anchor-id="estimation-of-poisson-regression-model">Estimation of Poisson Regression Model</h3>
 <p>Next, we extend our simple Poisson model to a Poisson Regression Model such that <span class="math inline">\(Y_i = \text{Poisson}(\lambda_i)\)</span> where <span class="math inline">\(\lambda_i = \exp(X_i'\beta)\)</span>. The interpretation is that the success rate of patent awards is not constant across all firms (<span class="math inline">\(\lambda\)</span>) but rather is a function of firm characteristics <span class="math inline">\(X_i\)</span>. Specifically, we will use the covariates age, age squared, region, and whether the firm is a customer of Blueprinty.</p>
-<p><em>todo: Update your likelihood or log-likelihood function with an additional argument to take in a covariate matrix X. Also change the parameter of the model from lambda to the beta vector. In this model, lambda must be a positive number, so we choose the inverse link function g_inv() to be exp() so that</em> <span class="math inline">\(\lambda_i = e^{X_i'\beta}\)</span>. <em>For example:</em></p>
-<pre><code>poisson_regression_likelihood &lt;- function(beta, Y, X){
-   ...
-}</code></pre>
-<p><em>todo: Use your function along with R’s optim() or Python’s sp.optimize() to find the MLE vector and the Hessian of the Poisson model with covariates. Specifically, the first column of X should be all 1’s to enable a constant term in the model, and the subsequent columns should be age, age squared, binary variables for all but one of the regions, and the binary customer variable. Use the Hessian to find standard errors of the beta parameter estimates and present a table of coefficients and standard errors.</em></p>
-<p><em>todo: Check your results using R’s glm() function or Python sm.GLM() function.</em></p>
-<p><em>todo: Interpret the results.</em></p>
-<p><em>todo: What do you conclude about the effect of Blueprinty’s software on patent success? Because the beta coefficients are not directly interpretable, it may help to create two fake datasets: X_0 and X_1 where X_0 is the X data but with iscustomer=0 for every observation and X_1 is the X data but with iscustomer=1 for every observation. Then, use X_0 and your fitted model to get the vector of predicted number of patents (y_pred_0) for every firm in the dataset, and use X_1 to get Y_pred_1 for every firm. Then subtract y_pred_1 minus y_pred_0 and take the average of that vector of differences.</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Poisson regression log-likelihood</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>poisson_regression_loglikelihood <span class="ot">&lt;-</span> <span class="cf">function</span>(beta, Y, X) {</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  lambda <span class="ot">&lt;-</span> <span class="fu">exp</span>(X <span class="sc">%*%</span> beta)  <span class="co"># vector of lambda_i values</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  loglik <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="sc">-</span>lambda <span class="sc">+</span> Y <span class="sc">*</span> (X <span class="sc">%*%</span> beta) <span class="sc">-</span> <span class="fu">lfactorial</span>(Y))</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(loglik)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>patents <span class="sc">~</span> age <span class="sc">+</span> <span class="fu">I</span>(age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> region <span class="sc">+</span> iscustomer</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>patents ~ age + I(age^2) + region + iscustomer</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create model matrix (X) and outcome (Y)</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> age <span class="sc">+</span> <span class="fu">I</span>(age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> region <span class="sc">+</span> iscustomer, <span class="at">data =</span> df)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> df<span class="sc">$</span>patents</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Try initial betas = 0</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>beta_start <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">ncol</span>(X))</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Maximize log-likelihood</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>neg_loglik <span class="ot">&lt;-</span> <span class="cf">function</span>(beta) <span class="sc">-</span><span class="fu">poisson_regression_loglikelihood</span>(beta, Y, X)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Run optimization</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">optim</span>(beta_start, neg_loglik, <span class="at">method =</span> <span class="st">"BFGS"</span>, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">maxit =</span> <span class="dv">1000</span>))</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="co"># View estimated coefficients</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>result<span class="sc">$</span>par</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.125735914  0.115793715 -0.002228748 -0.024556782 -0.034827790
+[6] -0.005441860 -0.037784109  0.060665584</code></pre>
+</div>
+</div>
+<p>In this regression-based Poisson model, we allow the expected number of patents awarded to vary across firms based on covariates. The expected value for each firm is modeled as an exponential function of the firm’s characteristics, ensuring that predicted counts remain positive. We include firm age, age squared, regional dummies, and customer status as predictors. The model is estimated by maximizing the log-likelihood function numerically.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the model matrix manually</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>agesq <span class="ot">&lt;-</span> df<span class="sc">$</span>age<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> age <span class="sc">+</span> agesq <span class="sc">+</span> region <span class="sc">+</span> iscustomer, <span class="at">data =</span> df)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> df<span class="sc">$</span>patents</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Define log-likelihood</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>poisson_regression_loglikelihood <span class="ot">&lt;-</span> <span class="cf">function</span>(beta, Y, X) {</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  lambda <span class="ot">&lt;-</span> <span class="fu">exp</span>(X <span class="sc">%*%</span> beta)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="sc">-</span>lambda <span class="sc">+</span> Y <span class="sc">*</span> (X <span class="sc">%*%</span> beta) <span class="sc">-</span> <span class="fu">lfactorial</span>(Y))</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Negative log-likelihood for optimization</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>neg_loglik <span class="ot">&lt;-</span> <span class="cf">function</span>(beta) <span class="sc">-</span><span class="fu">poisson_regression_loglikelihood</span>(beta, Y, X)</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Initial guess</span></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>beta_start <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">ncol</span>(X))</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Maximize using optim</span></span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>mle_result <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> beta_start,</span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>                    <span class="at">fn =</span> neg_loglik,</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>                    <span class="at">method =</span> <span class="st">"BFGS"</span>,</span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>                    <span class="at">hessian =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>                    <span class="at">control =</span> <span class="fu">list</span>(<span class="at">maxit =</span> <span class="dv">1000</span>))</span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract coefficients</span></span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a>beta_hat <span class="ot">&lt;-</span> mle_result<span class="sc">$</span>par</span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute standard errors from Hessian</span></span>
+<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a>hessian <span class="ot">&lt;-</span> mle_result<span class="sc">$</span>hessian</span>
+<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a>vcov <span class="ot">&lt;-</span> <span class="fu">solve</span>(hessian)  <span class="co"># variance-covariance matrix</span></span>
+<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(vcov))</span>
+<span id="cb31-32"><a href="#cb31-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-33"><a href="#cb31-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine results into a table</span></span>
+<span id="cb31-34"><a href="#cb31-34" aria-hidden="true" tabindex="-1"></a>results_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb31-35"><a href="#cb31-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">Term =</span> <span class="fu">colnames</span>(X),</span>
+<span id="cb31-36"><a href="#cb31-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">Estimate =</span> <span class="fu">round</span>(beta_hat, <span class="dv">4</span>),</span>
+<span id="cb31-37"><a href="#cb31-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">StdError =</span> <span class="fu">round</span>(se, <span class="dv">4</span>)</span>
+<span id="cb31-38"><a href="#cb31-38" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-39"><a href="#cb31-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-40"><a href="#cb31-40" aria-hidden="true" tabindex="-1"></a>results_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             Term Estimate StdError
+1     (Intercept)  -0.1257   0.1122
+2             age   0.1158   0.0064
+3           agesq  -0.0022   0.0001
+4 regionNortheast  -0.0246   0.0434
+5 regionNorthwest  -0.0348   0.0529
+6     regionSouth  -0.0054   0.0524
+7 regionSouthwest  -0.0378   0.0472
+8      iscustomer   0.0607   0.0321</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>glm_result <span class="ot">&lt;-</span> <span class="fu">glm</span>(patents <span class="sc">~</span> age <span class="sc">+</span> <span class="fu">I</span>(age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> region <span class="sc">+</span> iscustomer,</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> df, <span class="at">family =</span> <span class="fu">poisson</span>(<span class="at">link =</span> <span class="st">"log"</span>))</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = patents ~ age + I(age^2) + region + iscustomer, 
+    family = poisson(link = "log"), data = df)
+
+Coefficients:
+                 Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)     -0.508920   0.183179  -2.778  0.00546 ** 
+age              0.148619   0.013869  10.716  &lt; 2e-16 ***
+I(age^2)        -0.002971   0.000258 -11.513  &lt; 2e-16 ***
+regionNortheast  0.029170   0.043625   0.669  0.50372    
+regionNorthwest -0.017574   0.053781  -0.327  0.74383    
+regionSouth      0.056561   0.052662   1.074  0.28281    
+regionSouthwest  0.050576   0.047198   1.072  0.28391    
+iscustomer       0.207591   0.030895   6.719 1.83e-11 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 2362.5  on 1499  degrees of freedom
+Residual deviance: 2143.3  on 1492  degrees of freedom
+AIC: 6532.1
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<p>The Poisson regression results suggest that firm age and being a Blueprinty customer are significant predictors of patent counts. The customer coefficient is positive and statistically significant, indicating that — controlling for age and region — Blueprinty users tend to receive more patents. Age has a nonlinear effect: the positive coefficient on age and negative coefficient on age squared suggests that patent productivity increases with firm age up to a point, then declines. Regional effects vary, with some regions having significantly different baseline patenting levels. These results support the marketing team’s hypothesis, but causality should be interpreted cautiously due to potential selection bias in who becomes a customer.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predicted values using fitted beta_hat from optim()</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># (assumes you've already run your optimization and stored beta_hat)</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create counterfactual design matrices</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>X_0 <span class="ot">&lt;-</span> X</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>X_0[, <span class="st">"iscustomer"</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>X_1 <span class="ot">&lt;-</span> X</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>X_1[, <span class="st">"iscustomer"</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Predicted counts under both scenarios</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>y_pred_0 <span class="ot">&lt;-</span> <span class="fu">exp</span>(X_0 <span class="sc">%*%</span> beta_hat)</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>y_pred_1 <span class="ot">&lt;-</span> <span class="fu">exp</span>(X_1 <span class="sc">%*%</span> beta_hat)</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Difference in predicted patent counts</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>pred_diff <span class="ot">&lt;-</span> y_pred_1 <span class="sc">-</span> y_pred_0</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Average treatment effect of being a Blueprinty customer</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>avg_effect <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_diff)</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>avg_effect</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2178843</code></pre>
+</div>
+</div>
+<p>To quantify the effect of Blueprinty’s software on patenting success, we computed predicted patent counts for each firm under two hypothetical scenarios: one where no firm used the software, and one where all firms did. The average difference in predicted patents per firm was approximately r round(avg_effect, 3), indicating that — on average — Blueprinty customers are expected to receive that many more patents over a five-year period than non-customers, all else equal. While this supports the marketing team’s claim, we emphasize that the relationship is correlational, not necessarily causal.</p>
 </section>
 </section>
 <section id="airbnb-case-study" class="level2">
@@ -518,7 +657,120 @@ Variable Definitions
 </div>
 </div>
 </div>
-<p><em>todo: Assume the number of reviews is a good proxy for the number of bookings. Perform some exploratory data analysis to get a feel for the data, handle or drop observations with missing values on relevant variables, build one or more models (e.g., a poisson regression model for the number of bookings as proxied by the number of reviews), and interpret model coefficients to describe variation in the number of reviews as a function of the variables provided.</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>airbnb <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"../../data/airbnb.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+Rows: 40628 Columns: 14
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: "," chr
+(3): last_scraped, host_since, room_type dbl (10): ...1, id, days, bathrooms,
+bedrooms, price, number_of_reviews, rev... lgl (1): instant_bookable
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...1`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick look at structure and missingness</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(airbnb)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 40,628
+Columns: 14
+$ ...1                      &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1…
+$ id                        &lt;dbl&gt; 2515, 2595, 3647, 3831, 4611, 5099, 5107, 51…
+$ days                      &lt;dbl&gt; 3130, 3127, 3050, 3038, 3012, 2981, 2981, 29…
+$ last_scraped              &lt;chr&gt; "4/2/2017", "4/2/2017", "4/2/2017", "4/2/201…
+$ host_since                &lt;chr&gt; "9/6/2008", "9/9/2008", "11/25/2008", "12/7/…
+$ room_type                 &lt;chr&gt; "Private room", "Entire home/apt", "Private …
+$ bathrooms                 &lt;dbl&gt; 1, 1, 1, 1, NA, 1, 1, NA, 1, 1, 1, 1, 1, NA,…
+$ bedrooms                  &lt;dbl&gt; 1, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2,…
+$ price                     &lt;dbl&gt; 59, 230, 150, 89, 39, 212, 250, 60, 129, 79,…
+$ number_of_reviews         &lt;dbl&gt; 150, 20, 0, 116, 93, 60, 60, 50, 53, 329, 11…
+$ review_scores_cleanliness &lt;dbl&gt; 9, 9, NA, 9, 9, 9, 10, 8, 9, 7, 10, 9, 9, 9,…
+$ review_scores_location    &lt;dbl&gt; 9, 10, NA, 9, 8, 9, 9, 9, 10, 10, 10, 9, 10,…
+$ review_scores_value       &lt;dbl&gt; 9, 9, NA, 9, 9, 9, 10, 9, 9, 9, 10, 9, 10, 9…
+$ instant_bookable          &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FAL…</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(airbnb)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      ...1             id                days       last_scraped      
+ Min.   :    1   Min.   :    2515   Min.   :    1   Length:40628      
+ 1st Qu.:10158   1st Qu.: 4889868   1st Qu.:  542   Class :character  
+ Median :20314   Median : 9862878   Median :  996   Mode  :character  
+ Mean   :20314   Mean   : 9698889   Mean   : 1102                     
+ 3rd Qu.:30471   3rd Qu.:14667894   3rd Qu.: 1535                     
+ Max.   :40628   Max.   :18009669   Max.   :42828                     
+                                                                      
+  host_since         room_type           bathrooms        bedrooms     
+ Length:40628       Length:40628       Min.   :0.000   Min.   : 0.000  
+ Class :character   Class :character   1st Qu.:1.000   1st Qu.: 1.000  
+ Mode  :character   Mode  :character   Median :1.000   Median : 1.000  
+                                       Mean   :1.125   Mean   : 1.147  
+                                       3rd Qu.:1.000   3rd Qu.: 1.000  
+                                       Max.   :8.000   Max.   :10.000  
+                                       NA's   :160     NA's   :76      
+     price         number_of_reviews review_scores_cleanliness
+ Min.   :   10.0   Min.   :  0.0     Min.   : 2.000           
+ 1st Qu.:   70.0   1st Qu.:  1.0     1st Qu.: 9.000           
+ Median :  100.0   Median :  4.0     Median :10.000           
+ Mean   :  144.8   Mean   : 15.9     Mean   : 9.198           
+ 3rd Qu.:  170.0   3rd Qu.: 17.0     3rd Qu.:10.000           
+ Max.   :10000.0   Max.   :421.0     Max.   :10.000           
+                                     NA's   :10195            
+ review_scores_location review_scores_value instant_bookable
+ Min.   : 2.000         Min.   : 2.000      Mode :logical   
+ 1st Qu.: 9.000         1st Qu.: 9.000      FALSE:32759     
+ Median :10.000         Median :10.000      TRUE :7869      
+ Mean   : 9.414         Mean   : 9.332                      
+ 3rd Qu.:10.000         3rd Qu.:10.000                      
+ Max.   :10.000         Max.   :10.000                      
+ NA's   :10254          NA's   :10256                       </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop observations with missing values in key variables</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>airbnb_clean <span class="ot">&lt;-</span> airbnb <span class="sc">%&gt;%</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(number_of_reviews, room_type, bathrooms, bedrooms, price,</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>         review_scores_cleanliness, review_scores_location, review_scores_value,</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>         instant_bookable, days) <span class="sc">%&gt;%</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Distribution of reviews (proxy for bookings)</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(airbnb_clean, <span class="fu">aes</span>(<span class="at">x =</span> number_of_reviews)) <span class="sc">+</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="dv">0</span>, <span class="dv">100</span>) <span class="sc">+</span>  <span class="co"># cap for visibility</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribution of Number of Reviews"</span>, <span class="at">x =</span> <span class="st">"Number of Reviews"</span>, <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1069 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2 rows containing missing values or values outside the scale range
+(`geom_bar()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw2_questions_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Average reviews by room type</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>airbnb_clean <span class="sc">%&gt;%</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(room_type) <span class="sc">%&gt;%</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_reviews =</span> <span class="fu">mean</span>(number_of_reviews),</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">median_reviews =</span> <span class="fu">median</span>(number_of_reviews),</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 4
+  room_type       mean_reviews median_reviews     n
+  &lt;chr&gt;                  &lt;dbl&gt;          &lt;dbl&gt; &lt;int&gt;
+1 Entire home/apt         21.4              9 15543
+2 Private room            21.2              8 13773
+3 Shared room             17.0              8   844</code></pre>
+</div>
+</div>
+<p>The number of reviews is right-skewed, with most listings receiving fewer than 50 reviews. Entire apartments tend to have more reviews on average compared to private or shared rooms. There are also missing values in several review score columns, so we’ve dropped rows with missing values to focus on a clean subset for modeling.</p>
 
 
 </section>
