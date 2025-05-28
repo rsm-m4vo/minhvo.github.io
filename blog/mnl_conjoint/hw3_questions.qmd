@@ -135,13 +135,8 @@ rm(list=setdiff(ls(), "conjoint_data"))
 The "hard part" of the MNL likelihood function is organizing the data, as we need to keep track of 3 dimensions (consumer $i$, covariate $k$, and product $j$) instead of the typical 2 dimensions for cross-sectional regression models (consumer $i$ and covariate $k$). The fact that each task for each respondent has the same number of alternatives (3) helps.  In addition, we need to convert the categorical variables for brand and ads into binary variables.
 
 We begin by converting categorical variables into binary indicators. For the brand attribute, we create dummies for Netflix and Prime, leaving Hulu as the reference category. Similarly, we create a binary variable ad_yes indicating whether advertisements are included. This transformation ensures that all covariates are numeric and suitable for estimation in a Multinomial Logit framework. The resulting dataset includes one row per alternative, with each row identified by respondent, task, and alternative-specific features.
-```{r}
-library(readr)
+```{r, message=FALSE, warning=FALSE}
 library(dplyr)
-library(ggplot2)
-
-# Load the dataset
-conjoint_data <- read_csv("../../data/conjoint_data.csv")
 
 # Recode brand to dummy variables (reference category: Hulu)
 conjoint_data_prep <- conjoint_data %>%
@@ -246,19 +241,127 @@ knitr::kable(mle_summary, digits = 4)
 
 ## 5. Estimation via Bayesian Methods
 
-_todo: code up a metropolis-hasting MCMC sampler of the posterior distribution. Take 11,000 steps and throw away the first 1,000, retaining the subsequent 10,000._
+We now estimate the model using Bayesian methods via a Metropolis-Hastings MCMC sampler. We assume normal priors for each of the four coefficients: N(0, 5) for the binary variables (Netflix, Prime, Ads) and N(0, 1) for the price variable.
 
-_hint: Use N(0,5) priors for the betas on the binary variables, and a N(0,1) prior for the price beta._
+Candidate values are proposed by adding Gaussian noise to each parameter independently: the first three parameters are perturbed using N(0, 0.05) and the price parameter using N(0, 0.005). We ran the sampler for 11,000 iterations and discarded the first 1,000 as burn-in.
 
-_hint: instead of calculating post=lik*prior, you can work in the log-space and calculate log-post = log-lik + log-prior (this should enable you to re-use your log-likelihood function from the MLE section just above)_
+The table below reports the posterior means, standard deviations, and 95% credible intervals for each coefficient.
 
-_hint: King Markov (in the video) use a candidate distribution of a coin flip to decide whether to move left or right among his islands.  Unlike King Markov, we have 4 dimensions (because we have 4 betas) and our dimensions are continuous.  So, use a multivariate normal distribution to pospose the next location for the algorithm to move to. I recommend a MNV(mu, Sigma) where mu=c(0,0,0,0) and sigma has diagonal values c(0.05, 0.05, 0.05, 0.005) and zeros on the off-diagonal.  Since this MVN has no covariances, you can sample each dimension independently (so 4 univariate normals instead of 1 multivariate normal), where the first 3 univariate normals are N(0,0.05) and the last one if N(0,0.005)._
+```{r}
+set.seed(42)
 
+# Reuse data from before
+X <- conjoint_data_prep %>%
+  select(brand_Netflix, brand_Prime, ad_yes, price) %>%
+  as.matrix()
+y <- conjoint_data_prep$choice
+task_ids <- paste0(conjoint_data_prep$resp, "_", conjoint_data_prep$task)
 
-_todo: for at least one of the 4 parameters, show the trace plot of the algorithm, as well as the histogram of the posterior distribution._
+# Log-prior function
+log_prior <- function(beta) {
+  dnorm(beta[1], 0, sqrt(5), log = TRUE) +
+    dnorm(beta[2], 0, sqrt(5), log = TRUE) +
+    dnorm(beta[3], 0, sqrt(5), log = TRUE) +
+    dnorm(beta[4], 0, 1, log = TRUE)
+}
 
-_todo: report the 4 posterior means, standard deviations, and 95% credible intervals and compare them to your results from the Maximum Likelihood approach._
+# Log-posterior function (log-likelihood + log-prior)
+log_posterior <- function(beta) {
+  -log_likelihood(beta, X, y, task_ids) + log_prior(beta)
+}
 
+# Proposal function: Gaussian noise added to each dimension
+proposal_function <- function(beta) {
+  beta_new <- beta
+  beta_new[1:3] <- beta[1:3] + rnorm(3, 0, sqrt(0.05))
+  beta_new[4]   <- beta[4]   + rnorm(1, 0, sqrt(0.005))
+  return(beta_new)
+}
+
+# Metropolis-Hastings sampler
+run_mcmc <- function(start, iterations = 11000) {
+  chain <- matrix(NA, nrow = iterations, ncol = length(start))
+  chain[1, ] <- start
+  current_lp <- log_posterior(start)
+  
+  for (i in 2:iterations) {
+    proposal <- proposal_function(chain[i - 1, ])
+    proposal_lp <- log_posterior(proposal)
+    
+    accept_prob <- exp(proposal_lp - current_lp)
+    if (runif(1) < accept_prob) {
+      chain[i, ] <- proposal
+      current_lp <- proposal_lp
+    } else {
+      chain[i, ] <- chain[i - 1, ]
+    }
+  }
+  return(chain)
+}
+
+# Run the MCMC
+start_vals <- rep(0, 4)
+mcmc_chain <- run_mcmc(start = start_vals, iterations = 11000)
+
+# Drop burn-in
+mcmc_chain_post <- mcmc_chain[1001:11000, ]
+colnames(mcmc_chain_post) <- colnames(X)
+
+# Show summary of posterior means and 95% credible intervals
+bayes_summary <- data.frame(
+  Mean = apply(mcmc_chain_post, 2, mean),
+  SD = apply(mcmc_chain_post, 2, sd),
+  CI_Lower = apply(mcmc_chain_post, 2, quantile, 0.025),
+  CI_Upper = apply(mcmc_chain_post, 2, quantile, 0.975)
+)
+
+knitr::kable(bayes_summary, digits = 4)
+```
+
+Below we show the trace plot and posterior histogram for the price coefficient. The trace plot demonstrates good mixing and stationarity, indicating the sampler is performing well. The histogram reflects the shape of the marginal posterior distribution for that parameter.
+```{r}
+library(ggplot2)
+
+# Extract the price coefficient samples (column 4)
+price_samples <- mcmc_chain_post[, "price"]
+
+# Create a data frame for plotting
+price_df <- data.frame(
+  Iteration = 1:length(price_samples),
+  Beta_Price = price_samples
+)
+
+# Trace plot
+ggplot(price_df, aes(x = Iteration, y = Beta_Price)) +
+  geom_line() +
+  labs(title = "Trace Plot of Beta_Price", y = "Beta_Price", x = "Iteration")
+
+# Histogram
+ggplot(price_df, aes(x = Beta_Price)) +
+  geom_histogram(bins = 40, color = "black", fill = "lightblue") +
+  labs(title = "Posterior Distribution of Beta_Price", x = "Beta_Price", y = "Frequency")
+```
+
+We also report the posterior means, standard deviations, and 95% credible intervals for all four parameters, and compare them to the corresponding values from the Maximum Likelihood Estimation. Across all four coefficients, the posterior means are very close to the MLEs, with similar uncertainty ranges. This reinforces the idea that both estimation approaches yield consistent results, while Bayesian methods additionally provide full posterior distributions.
+```{r}
+# Add method label to each
+bayes_summary$Method <- "Bayesian"
+mle_summary$Method <- "MLE"
+
+# Add variable names
+bayes_summary$Parameter <- rownames(bayes_summary)
+mle_summary$Parameter <- rownames(mle_summary)
+
+# Combine both
+comparison_table <- rbind(
+  bayes_summary[, c("Parameter", "Method", "Mean", "SD", "CI_Lower", "CI_Upper")],
+  mle_summary[, c("Parameter", "Method", "Estimate", "StdError", "CI_Lower", "CI_Upper")] %>%
+    rename(Mean = Estimate, SD = StdError)
+)
+
+# Show comparison table
+knitr::kable(comparison_table, digits = 4)
+```
 
 
 ## 6. Discussion

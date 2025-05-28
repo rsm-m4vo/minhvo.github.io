@@ -19,7 +19,7 @@ However, Blueprinty has collected data on 1,500 mature (non-startup) engineering
 
 We begin by loading the Blueprinty dataset, which includes 1,500 engineering firms. For each firm, we have the number of patents awarded over the past 5 years, whether or not the firm uses Blueprinty's software, and basic firm characteristics such as region and age.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(readr)
 library(dplyr)
 library(ggplot2)
