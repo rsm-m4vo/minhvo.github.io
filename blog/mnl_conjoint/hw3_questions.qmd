@@ -248,7 +248,7 @@ The table below reports the posterior means, standard deviations, and 95% credib
 ```{r}
 set.seed(42)
 
-# Reuse data from real dataset
+# Use simulated data
 X <- conjoint_data_prep %>%
   select(brand_Netflix, brand_Prime, ad_yes, price) %>%
   as.matrix()
@@ -346,9 +346,10 @@ We also report the posterior means, standard deviations, and 95% credible interv
 bayes_summary$Method <- "Bayesian"
 mle_summary$Method <- "MLE"
 
-# Add variable names
-bayes_summary$Parameter <- rownames(bayes_summary)
-mle_summary$Parameter <- rownames(mle_summary)
+# Assign parameter names explicitly using column names from X
+param_names <- colnames(X)
+bayes_summary$Parameter <- param_names
+mle_summary$Parameter <- param_names
 
 # Combine both
 comparison_table <- rbind(
@@ -359,6 +360,7 @@ comparison_table <- rbind(
 
 # Show comparison table
 knitr::kable(comparison_table, digits = 4)
+
 ```
 
 
@@ -412,10 +414,12 @@ mle_real
 ```
 
 To simulate data from a multi-level (hierarchical) model, we would assign each individual their own set of preference weights (betas), rather than using the same beta vector for everyone.
+
 Each person's beta_i would be drawn from a population-level distribution, typically a multivariate normal:
 beta_i ~ MVN(mu, Sigma)
+
 We would then simulate choices for each respondent using their own beta_i. This allows us to model preference heterogeneity across individuals.
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(MASS)  # for mvrnorm
 
 set.seed(123)
@@ -432,7 +436,9 @@ head(beta_individuals)
 ```
 
 To estimate a hierarchical model, we treat the beta_i values as unobserved (latent) variables and aim to estimate both the individual-level preferences and the population-level distribution (mu, Sigma).
+
 This is usually done using Bayesian methods (like MCMC or hierarchical Bayes) or maximum simulated likelihood.
+
 Hierarchical models are more realistic for real-world conjoint data, where different consumers have different preferences.
 ```{r}
 # Example profiles
