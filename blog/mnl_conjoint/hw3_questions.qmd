@@ -373,7 +373,7 @@ The coefficient on Netflix is larger than the coefficient on Prime (beta_Netflix
 The estimated coefficient on price is negative (beta_price < 0), which is consistent with standard economic theory. It indicates that as the monthly price of a streaming service increases, the probability that a consumer selects that service decreases.
 
 These findings reinforce the intuitive idea that brand and price are key drivers of choice behavior. The negative impact of ads and the preference for Netflix suggest that both product experience and brand perception influence consumer decisions in this context.
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(readr)
 
 # Load real data
