@@ -243,14 +243,14 @@ knitr::kable(mle_summary, digits = 4)
 
 We now estimate the model using Bayesian methods via a Metropolis-Hastings MCMC sampler. We assume normal priors for each of the four coefficients: N(0, 5) for the binary variables (Netflix, Prime, Ads) and N(0, 1) for the price variable.
 
-Candidate values are proposed by adding Gaussian noise to each parameter independently: the first three parameters are perturbed using N(0, 0.05) and the price parameter using N(0, 0.005). We ran the sampler for 11,000 iterations and discarded the first 1,000 as burn-in.
+Candidate values are proposed by adding Gaussian noise to each parameter independently: the first three parameters are perturbed using N(0, 0.05) and the price parameter using N(0, 0.005). We ran the sampler for 1,000 iterations and discarded the first 100 as burn-in.
 
 The table below reports the posterior means, standard deviations, and 95% credible intervals for each coefficient.
 
 ```{r}
 set.seed(42)
 
-# Reuse data from before
+# Reuse data from real dataset
 X <- conjoint_data_prep %>%
   select(brand_Netflix, brand_Prime, ad_yes, price) %>%
   as.matrix()
@@ -270,7 +270,7 @@ log_posterior <- function(beta) {
   -log_likelihood(beta, X, y, task_ids) + log_prior(beta)
 }
 
-# Proposal function: Gaussian noise added to each dimension
+# Proposal function
 proposal_function <- function(beta) {
   beta_new <- beta
   beta_new[1:3] <- beta[1:3] + rnorm(3, 0, sqrt(0.05))
@@ -278,8 +278,8 @@ proposal_function <- function(beta) {
   return(beta_new)
 }
 
-# Metropolis-Hastings sampler
-run_mcmc <- function(start, iterations = 11000) {
+# MCMC sampler
+run_mcmc <- function(start, iterations = 1000) {
   chain <- matrix(NA, nrow = iterations, ncol = length(start))
   chain[1, ] <- start
   current_lp <- log_posterior(start)
@@ -299,15 +299,15 @@ run_mcmc <- function(start, iterations = 11000) {
   return(chain)
 }
 
-# Run the MCMC
+# Run MCMC
 start_vals <- rep(0, 4)
-mcmc_chain <- run_mcmc(start = start_vals, iterations = 11000)
+mcmc_chain <- run_mcmc(start = start_vals, iterations = 1000)
 
-# Drop burn-in
-mcmc_chain_post <- mcmc_chain[1001:11000, ]
+# Discard first 100 as burn-in
+mcmc_chain_post <- mcmc_chain[101:1000, ]
 colnames(mcmc_chain_post) <- colnames(X)
 
-# Show summary of posterior means and 95% credible intervals
+# Summarize posterior
 bayes_summary <- data.frame(
   Mean = apply(mcmc_chain_post, 2, mean),
   SD = apply(mcmc_chain_post, 2, sd),
