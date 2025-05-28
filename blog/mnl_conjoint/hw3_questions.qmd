@@ -210,7 +210,6 @@ mle_estimates
 ```
 
 We use the optim() function in R to obtain maximum likelihood estimates for the four parameters: brand (Netflix, Prime), ads, and price. To assess the uncertainty in our estimates, we compute the standard errors from the inverse of the Hessian matrix returned by the optimizer. We then construct 95% confidence intervals using the normal approximation. The table below summarizes the point estimates, standard errors, and confidence intervals for each attribute.
-
 ```{r}
 # Extract estimated beta coefficients
 mle_estimates <- result$par
@@ -246,7 +245,6 @@ We now estimate the model using Bayesian methods via a Metropolis-Hastings MCMC 
 Candidate values are proposed by adding Gaussian noise to each parameter independently: the first three parameters are perturbed using N(0, 0.05) and the price parameter using N(0, 0.005). We ran the sampler for 1,000 iterations and discarded the first 100 as burn-in.
 
 The table below reports the posterior means, standard deviations, and 95% credible intervals for each coefficient.
-
 ```{r}
 set.seed(42)
 
@@ -366,17 +364,103 @@ knitr::kable(comparison_table, digits = 4)
 
 ## 6. Discussion
 
-_todo: Suppose you did not simulate the data. What do you observe about the parameter estimates? What does $\beta_\text{Netflix} > \beta_\text{Prime}$ mean? Does it make sense that $\beta_\text{price}$ is negative?_
+Now using the actual dataset rather than simulated data, we observe that the estimated coefficients tell a coherent story about consumer preferences.
 
-_todo: At a high level, discuss what change you would need to make in order to simulate data from --- and estimate the parameters of --- a multi-level (aka random-parameter or hierarchical) model. This is the model we use to analyze "real world" conjoint data._
+The coefficient on Netflix is larger than the coefficient on Prime (beta_Netflix > beta_Prime), which suggests that — all else equal — consumers tend to prefer Netflix over Amazon Prime. This means that the utility associated with Netflix-branded options was typically higher, increasing the likelihood of selection.
 
+The estimated coefficient on price is negative (beta_price < 0), which is consistent with standard economic theory. It indicates that as the monthly price of a streaming service increases, the probability that a consumer selects that service decreases.
 
+These findings reinforce the intuitive idea that brand and price are key drivers of choice behavior. The negative impact of ads and the preference for Netflix suggest that both product experience and brand perception influence consumer decisions in this context.
+```{r}
+library(readr)
 
+# Load real data
+real_data <- read_csv("../../data/conjoint_data.csv")
 
+# Preprocess: create dummies
+real_data_prep <- real_data %>%
+  mutate(
+    brand_Netflix = as.integer(brand == "N"),
+    brand_Prime   = as.integer(brand == "P"),
+    ad_yes        = as.integer(ad == "Yes")
+  ) %>%
+  select(resp, task, brand_Netflix, brand_Prime, ad_yes, price, choice)
 
+# Set up for MLE
+X_real <- real_data_prep %>%
+  select(brand_Netflix, brand_Prime, ad_yes, price) %>%
+  as.matrix()
+y_real <- real_data_prep$choice
+task_ids_real <- paste0(real_data_prep$resp, "_", real_data_prep$task)
 
+# Use existing log-likelihood function
+beta0 <- rep(0, ncol(X_real))
 
+result_real <- optim(
+  par = beta0,
+  fn = log_likelihood,
+  X = X_real,
+  y = y_real,
+  task_ids = task_ids_real,
+  method = "BFGS",
+  hessian = TRUE
+)
 
+mle_real <- result_real$par
+names(mle_real) <- colnames(X_real)
+mle_real
+```
 
+To simulate data from a multi-level (hierarchical) model, we would assign each individual their own set of preference weights (betas), rather than using the same beta vector for everyone.
+Each person's beta_i would be drawn from a population-level distribution, typically a multivariate normal:
+beta_i ~ MVN(mu, Sigma)
+We would then simulate choices for each respondent using their own beta_i. This allows us to model preference heterogeneity across individuals.
+```{r}
+library(MASS)  # for mvrnorm
 
+set.seed(123)
 
+# Define population-level parameters
+mu <- c(Net = 1.0, Prime = 0.5, Ads = -0.8, Price = -0.1)
+Sigma <- diag(c(0.3, 0.3, 0.2, 0.02)^2)
+
+# Simulate betas for 100 individuals
+n_respondents <- 100
+beta_individuals <- mvrnorm(n_respondents, mu = mu, Sigma = Sigma)
+
+head(beta_individuals)
+```
+
+To estimate a hierarchical model, we treat the beta_i values as unobserved (latent) variables and aim to estimate both the individual-level preferences and the population-level distribution (mu, Sigma).
+This is usually done using Bayesian methods (like MCMC or hierarchical Bayes) or maximum simulated likelihood.
+Hierarchical models are more realistic for real-world conjoint data, where different consumers have different preferences.
+```{r}
+# Example profiles
+profiles <- expand.grid(
+  brand = c("N", "P", "H"),
+  ad = c("Yes", "No"),
+  price = seq(8, 32, by = 4)
+)
+
+# Encode features
+profiles <- profiles[sample(nrow(profiles), 3), ]  # select 3 random alternatives
+profiles$brand_Netflix <- as.integer(profiles$brand == "N")
+profiles$brand_Prime <- as.integer(profiles$brand == "P")
+profiles$ad_yes <- as.integer(profiles$ad == "Yes")
+
+X <- as.matrix(profiles[, c("brand_Netflix", "brand_Prime", "ad_yes", "price")])
+
+# Choose beta for respondent 1
+beta_1 <- beta_individuals[1, ]
+
+# Simulate utility + Gumbel noise
+v <- X %*% beta_1
+e <- -log(-log(runif(3)))  # Gumbel noise
+u <- v + e
+
+# Identify chosen alternative
+profiles$utility <- u
+profiles$chosen <- as.integer(u == max(u))
+
+profiles
+```

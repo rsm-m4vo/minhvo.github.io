@@ -421,8 +421,7 @@ Note
    0.94120473    0.50161701   -0.73200143   -0.09948157 </code></pre>
 </div>
 <p>:::</p>
-<p>We use the optim() function in R to obtain maximum likelihood estimates for the four parameters: brand (Netflix, Prime), ads, and price. To assess the uncertainty in our estimates, we compute the standard errors from the inverse of the Hessian matrix returned by the optimizer. We then construct 95% confidence intervals using the normal approximation. The table below summarizes the point estimates, standard errors, and confidence intervals for each attribute.</p>
-<div class="cell">
+<p>We use the optim() function in R to obtain maximum likelihood estimates for the four parameters: brand (Netflix, Prime), ads, and price. To assess the uncertainty in our estimates, we compute the standard errors from the inverse of the Hessian matrix returned by the optimizer. We then construct 95% confidence intervals using the normal approximation. The table below summarizes the point estimates, standard errors, and confidence intervals for each attribute. ::: {.cell}</p>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract estimated beta coefficients</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>mle_estimates <span class="ot">&lt;-</span> result<span class="sc">$</span>par</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mle_estimates) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(X)</span>
@@ -449,7 +448,7 @@ Note
 <span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Show table</span></span>
 <span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(mle_summary, <span class="at">digits =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
@@ -491,14 +490,13 @@ Note
 </tbody>
 </table>
 </div>
-</div>
+<p>:::</p>
 </section>
 <section id="estimation-via-bayesian-methods" class="level2">
 <h2 class="anchored" data-anchor-id="estimation-via-bayesian-methods">5. Estimation via Bayesian Methods</h2>
 <p>We now estimate the model using Bayesian methods via a Metropolis-Hastings MCMC sampler. We assume normal priors for each of the four coefficients: N(0, 5) for the binary variables (Netflix, Prime, Ads) and N(0, 1) for the price variable.</p>
 <p>Candidate values are proposed by adding Gaussian noise to each parameter independently: the first three parameters are perturbed using N(0, 0.05) and the price parameter using N(0, 0.005). We ran the sampler for 1,000 iterations and discarded the first 100 as burn-in.</p>
-<p>The table below reports the posterior means, standard deviations, and 95% credible intervals for each coefficient.</p>
-<div class="cell">
+<p>The table below reports the posterior means, standard deviations, and 95% credible intervals for each coefficient. ::: {.cell}</p>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Reuse data from real dataset</span></span>
@@ -568,7 +566,7 @@ Note
 <span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(bayes_summary, <span class="at">digits =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
@@ -610,7 +608,7 @@ Note
 </tbody>
 </table>
 </div>
-</div>
+<p>:::</p>
 <p>Below we show the trace plot and posterior histogram for the price coefficient. The trace plot demonstrates good mixing and stationarity, indicating the sampler is performing well. The histogram reflects the shape of the marginal posterior distribution for that parameter. ::: {.cell}</p>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -766,8 +764,129 @@ Note
 </section>
 <section id="discussion" class="level2">
 <h2 class="anchored" data-anchor-id="discussion">6. Discussion</h2>
-<p><em>todo: Suppose you did not simulate the data. What do you observe about the parameter estimates? What does <span class="math inline">\(\beta_\text{Netflix} &gt; \beta_\text{Prime}\)</span> mean? Does it make sense that <span class="math inline">\(\beta_\text{price}\)</span> is negative?</em></p>
-<p><em>todo: At a high level, discuss what change you would need to make in order to simulate data from — and estimate the parameters of — a multi-level (aka random-parameter or hierarchical) model. This is the model we use to analyze “real world” conjoint data.</em></p>
+<p>Now using the actual dataset rather than simulated data, we observe that the estimated coefficients tell a coherent story about consumer preferences.</p>
+<p>The coefficient on Netflix is larger than the coefficient on Prime (beta_Netflix &gt; beta_Prime), which suggests that — all else equal — consumers tend to prefer Netflix over Amazon Prime. This means that the utility associated with Netflix-branded options was typically higher, increasing the likelihood of selection.</p>
+<p>The estimated coefficient on price is negative (beta_price &lt; 0), which is consistent with standard economic theory. It indicates that as the monthly price of a streaming service increases, the probability that a consumer selects that service decreases.</p>
+<p>These findings reinforce the intuitive idea that brand and price are key drivers of choice behavior. The negative impact of ads and the preference for Netflix suggest that both product experience and brand perception influence consumer decisions in this context. ::: {.cell}</p>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load real data</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>real_data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"../../data/conjoint_data.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 3000 Columns: 6
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (2): brand, ad
+dbl (4): resp, task, choice, price
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Preprocess: create dummies</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>real_data_prep <span class="ot">&lt;-</span> real_data <span class="sc">%&gt;%</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">brand_Netflix =</span> <span class="fu">as.integer</span>(brand <span class="sc">==</span> <span class="st">"N"</span>),</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">brand_Prime   =</span> <span class="fu">as.integer</span>(brand <span class="sc">==</span> <span class="st">"P"</span>),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ad_yes        =</span> <span class="fu">as.integer</span>(ad <span class="sc">==</span> <span class="st">"Yes"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(resp, task, brand_Netflix, brand_Prime, ad_yes, price, choice)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Set up for MLE</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>X_real <span class="ot">&lt;-</span> real_data_prep <span class="sc">%&gt;%</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(brand_Netflix, brand_Prime, ad_yes, price) <span class="sc">%&gt;%</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>()</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>y_real <span class="ot">&lt;-</span> real_data_prep<span class="sc">$</span>choice</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>task_ids_real <span class="ot">&lt;-</span> <span class="fu">paste0</span>(real_data_prep<span class="sc">$</span>resp, <span class="st">"_"</span>, real_data_prep<span class="sc">$</span>task)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Use existing log-likelihood function</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>beta0 <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">ncol</span>(X_real))</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>result_real <span class="ot">&lt;-</span> <span class="fu">optim</span>(</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">par =</span> beta0,</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">fn =</span> log_likelihood,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">X =</span> X_real,</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> y_real,</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">task_ids =</span> task_ids_real,</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"BFGS"</span>,</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">hessian =</span> <span class="cn">TRUE</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>mle_real <span class="ot">&lt;-</span> result_real<span class="sc">$</span>par</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mle_real) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(X_real)</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>mle_real</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>brand_Netflix   brand_Prime        ad_yes         price 
+   0.94120473    0.50161701   -0.73200143   -0.09948157 </code></pre>
+</div>
+<p>:::</p>
+<p>To simulate data from a multi-level (hierarchical) model, we would assign each individual their own set of preference weights (betas), rather than using the same beta vector for everyone. Each person’s beta_i would be drawn from a population-level distribution, typically a multivariate normal: beta_i ~ MVN(mu, Sigma) We would then simulate choices for each respondent using their own beta_i. This allows us to model preference heterogeneity across individuals. ::: {.cell}</p>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)  <span class="co"># for mvrnorm</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'MASS'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dplyr':
+
+    select</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Define population-level parameters</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">Net =</span> <span class="fl">1.0</span>, <span class="at">Prime =</span> <span class="fl">0.5</span>, <span class="at">Ads =</span> <span class="sc">-</span><span class="fl">0.8</span>, <span class="at">Price =</span> <span class="sc">-</span><span class="fl">0.1</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.02</span>)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate betas for 100 individuals</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>n_respondents <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>beta_individuals <span class="ot">&lt;-</span> <span class="fu">mvrnorm</span>(n_respondents, <span class="at">mu =</span> mu, <span class="at">Sigma =</span> Sigma)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(beta_individuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Net     Prime        Ads       Price
+[1,] 0.8318573 0.2868780 -0.3602379 -0.11430484
+[2,] 0.9309468 0.5770651 -0.5375174 -0.11505378
+[3,] 1.4676125 0.4259924 -0.8530290 -0.11877077
+[4,] 1.0211525 0.3957372 -0.6913612 -0.12105027
+[5,] 1.0387863 0.2145144 -0.8828680 -0.10874319
+[6,] 1.5145195 0.4864917 -0.8952494 -0.09337642</code></pre>
+</div>
+<p>:::</p>
+<p>To estimate a hierarchical model, we treat the beta_i values as unobserved (latent) variables and aim to estimate both the individual-level preferences and the population-level distribution (mu, Sigma). This is usually done using Bayesian methods (like MCMC or hierarchical Bayes) or maximum simulated likelihood. Hierarchical models are more realistic for real-world conjoint data, where different consumers have different preferences. ::: {.cell}</p>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example profiles</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>profiles <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">brand =</span> <span class="fu">c</span>(<span class="st">"N"</span>, <span class="st">"P"</span>, <span class="st">"H"</span>),</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">ad =</span> <span class="fu">c</span>(<span class="st">"Yes"</span>, <span class="st">"No"</span>),</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">price =</span> <span class="fu">seq</span>(<span class="dv">8</span>, <span class="dv">32</span>, <span class="at">by =</span> <span class="dv">4</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Encode features</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>profiles <span class="ot">&lt;-</span> profiles[<span class="fu">sample</span>(<span class="fu">nrow</span>(profiles), <span class="dv">3</span>), ]  <span class="co"># select 3 random alternatives</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>profiles<span class="sc">$</span>brand_Netflix <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(profiles<span class="sc">$</span>brand <span class="sc">==</span> <span class="st">"N"</span>)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>profiles<span class="sc">$</span>brand_Prime <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(profiles<span class="sc">$</span>brand <span class="sc">==</span> <span class="st">"P"</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>profiles<span class="sc">$</span>ad_yes <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(profiles<span class="sc">$</span>ad <span class="sc">==</span> <span class="st">"Yes"</span>)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(profiles[, <span class="fu">c</span>(<span class="st">"brand_Netflix"</span>, <span class="st">"brand_Prime"</span>, <span class="st">"ad_yes"</span>, <span class="st">"price"</span>)])</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Choose beta for respondent 1</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>beta_1 <span class="ot">&lt;-</span> beta_individuals[<span class="dv">1</span>, ]</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate utility + Gumbel noise</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> X <span class="sc">%*%</span> beta_1</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log</span>(<span class="sc">-</span><span class="fu">log</span>(<span class="fu">runif</span>(<span class="dv">3</span>)))  <span class="co"># Gumbel noise</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> v <span class="sc">+</span> e</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify chosen alternative</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>profiles<span class="sc">$</span>utility <span class="ot">&lt;-</span> u</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>profiles<span class="sc">$</span>chosen <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(u <span class="sc">==</span> <span class="fu">max</span>(u))</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>profiles</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   brand  ad price brand_Netflix brand_Prime ad_yes   utility chosen
+41     P  No    32             0           1      0 -3.660838      0
+12     H  No    12             0           0      0  2.074713      1
+8      P Yes    12             0           1      1 -1.111536      0</code></pre>
+</div>
+<p>:::</p>
 
 
 </section>
