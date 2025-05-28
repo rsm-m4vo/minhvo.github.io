@@ -1,7 +1,7 @@
 ---
 title: "Multinomial Logit Model"
-author: "Your Name"
-date: today
+author: "Minh Vo"
+date: 2025-05-27
 ---
 
 
@@ -134,17 +134,115 @@ rm(list=setdiff(ls(), "conjoint_data"))
 
 The "hard part" of the MNL likelihood function is organizing the data, as we need to keep track of 3 dimensions (consumer $i$, covariate $k$, and product $j$) instead of the typical 2 dimensions for cross-sectional regression models (consumer $i$ and covariate $k$). The fact that each task for each respondent has the same number of alternatives (3) helps.  In addition, we need to convert the categorical variables for brand and ads into binary variables.
 
-_todo: reshape and prep the data_
+We begin by converting categorical variables into binary indicators. For the brand attribute, we create dummies for Netflix and Prime, leaving Hulu as the reference category. Similarly, we create a binary variable ad_yes indicating whether advertisements are included. This transformation ensures that all covariates are numeric and suitable for estimation in a Multinomial Logit framework. The resulting dataset includes one row per alternative, with each row identified by respondent, task, and alternative-specific features.
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+# Load the dataset
+conjoint_data <- read_csv("../../data/conjoint_data.csv")
+
+# Recode brand to dummy variables (reference category: Hulu)
+conjoint_data_prep <- conjoint_data %>%
+  mutate(
+    brand_Netflix = as.integer(brand == "N"),
+    brand_Prime   = as.integer(brand == "P"),
+    ad_yes        = as.integer(ad == "Yes")  # Ad included = 1
+  ) %>%
+  # Drop original categorical variables
+  select(-brand, -ad)
+
+# View structure to confirm
+head(conjoint_data_prep)
+```
 
 
 
 ## 4. Estimation via Maximum Likelihood
 
-_todo: Code up the log-likelihood function._
+We now estimate the parameters of the MNL model using Maximum Likelihood. The log-likelihood is constructed by evaluating the softmax probability of each alternative within a choice task and summing the log-probabilities of the chosen alternatives. We use the optim() function in R with the BFGS method to maximize the likelihood. The estimated part-worth utilities are reported below.
+```{r}
+# Get matrix of predictors
+X <- conjoint_data_prep %>%
+  select(brand_Netflix, brand_Prime, ad_yes, price) %>%
+  as.matrix()
 
-_todo: Use `optim()` in R or `scipy.optimize()` in Python to find the MLEs for the 4 parameters ($\beta_\text{netflix}$, $\beta_\text{prime}$, $\beta_\text{ads}$, $\beta_\text{price}$), as well as their standard errors (from the Hessian). For each parameter construct a 95% confidence interval._
+# Response vector: 1 if chosen, 0 otherwise
+y <- conjoint_data_prep$choice
 
+# Vector identifying choice tasks (groupings of 3 alternatives per task)
+task_ids <- paste0(conjoint_data_prep$resp, "_", conjoint_data_prep$task)
 
+# Define log-likelihood function
+log_likelihood <- function(beta, X, y, task_ids) {
+  ll <- 0
+  beta <- matrix(beta, ncol = 1)
+  
+  for (t in unique(task_ids)) {
+    idx <- which(task_ids == t)
+    Xt <- X[idx, ]
+    yt <- y[idx]
+    
+    v <- Xt %*% beta               # deterministic utility
+    exp_v <- exp(v)
+    probs <- exp_v / sum(exp_v)   # softmax
+    ll <- ll + sum(yt * log(probs))
+  }
+  
+  return(-ll)  # negative log-likelihood for minimization
+}
+
+# Initial guess for beta (e.g., all zeros)
+beta0 <- rep(0, ncol(X))
+
+# Run optimization
+result <- optim(
+  par = beta0,
+  fn = log_likelihood,
+  X = X,
+  y = y,
+  task_ids = task_ids,
+  method = "BFGS",
+  control = list(maxit = 1000),
+  hessian = TRUE
+)
+
+# Print MLE estimates
+mle_estimates <- result$par
+names(mle_estimates) <- colnames(X)
+mle_estimates
+```
+
+We use the optim() function in R to obtain maximum likelihood estimates for the four parameters: brand (Netflix, Prime), ads, and price. To assess the uncertainty in our estimates, we compute the standard errors from the inverse of the Hessian matrix returned by the optimizer. We then construct 95% confidence intervals using the normal approximation. The table below summarizes the point estimates, standard errors, and confidence intervals for each attribute.
+
+```{r}
+# Extract estimated beta coefficients
+mle_estimates <- result$par
+names(mle_estimates) <- colnames(X)
+
+# Invert Hessian to get variance-covariance matrix
+hessian_inv <- solve(result$hessian)
+
+# Standard errors = sqrt of diagonal
+std_errors <- sqrt(diag(hessian_inv))
+
+# 95% confidence intervals
+z_value <- qnorm(0.975)
+ci_lower <- mle_estimates - z_value * std_errors
+ci_upper <- mle_estimates + z_value * std_errors
+
+# Combine into a summary table
+mle_summary <- data.frame(
+  Estimate = mle_estimates,
+  StdError = std_errors,
+  CI_Lower = ci_lower,
+  CI_Upper = ci_upper
+)
+
+# Show table
+knitr::kable(mle_summary, digits = 4)
+```
 
 ## 5. Estimation via Bayesian Methods
 
