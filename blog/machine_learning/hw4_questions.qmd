@@ -4,30 +4,105 @@ author: "Minh Vo"
 date: 2025-06-11
 ---
 
-_todo: do two analyses.  Do one of either 1a or 1b, AND one of either 2a or 2b._
+```{r, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
 
+# Load the dataset
+drivers <- read_csv("../../data/data_for_drivers_analysis.csv")
+penguins <- read_csv("../../data/palmer_penguins.csv")
+yogurt <- read_csv("../../data/yogurt_data.csv")
+```
 
 ## 1a. K-Means
 
-_todo: write your own code to implement the k-means algorithm.  Make plots of the various steps the algorithm takes so you can "see" the algorithm working.  Test your algorithm on the Palmer Penguins dataset, specifically using the bill length and flipper length variables.  Compare your results to the built-in `kmeans` function in R or Python._
+We implement the K-means clustering algorithm from scratch to cluster penguins based on two continuous features: bill length and flipper length. K-means attempts to partition data into `k` clusters by iteratively updating cluster centers and reassigning points based on Euclidean distance.
+```{r, message=FALSE, warning=FALSE}
+# Prep the penguins dataset
+penguins_clean <- penguins %>%
+  select(bill_length_mm, flipper_length_mm) %>%
+  na.omit()
 
-_todo: Calculate both the within-cluster-sum-of-squares and silhouette scores (you can use built-in functions to do so) and plot the results for various numbers of clusters (ie, K=2,3,...,7). What is the "right" number of clusters as suggested by these two metrics?_
+set.seed(1)
 
-_If you want a challenge, add your plots as an animated gif on your website so that the result looks something like [this](https://www.youtube.com/shorts/XCsoWZU9oN8)._
+# Initialize K-means from scratch
+k_means_custom <- function(data, k = 3, max_iter = 10) {
+  n <- nrow(data)
+  centers <- data[sample(1:n, k), ]  # random initial centers
+  clusters <- rep(0, n)
+  history <- list()
 
+  for (iter in 1:max_iter) {
+    # Assign points to closest center
+    dists <- sapply(1:k, function(i) rowSums((data - centers[i, ])^2))
+    new_clusters <- apply(dists, 1, which.min)
 
+    # Store for plotting
+    history[[iter]] <- list(centers = centers, clusters = new_clusters)
 
-## 1b. Latent-Class MNL
+    # Update centers
+    for (i in 1:k) {
+      if (sum(new_clusters == i) > 0) {
+        centers[i, ] <- colMeans(data[new_clusters == i, , drop = FALSE])
+      }
+    }
 
-_todo: Use the Yogurt dataset to estimate a latent-class MNL model. This model was formally introduced in the paper by Kamakura & Russell (1989); you may want to read or reference page 2 of the pdf, which is described in the class slides, session 4, slides 56-57._
+    # Check convergence
+    if (all(new_clusters == clusters)) break
+    clusters <- new_clusters
+  }
 
-_The data provides anonymized consumer identifiers (`id`), a vector indicating the chosen product (`y1`:`y4`), a vector indicating if any products were "featured" in the store as a form of advertising (`f1`:`f4`), and the products' prices in price-per-ounce (`p1`:`p4`). For example, consumer 1 purchased yogurt 4 at a price of 0.079/oz and none of the yogurts were featured/advertised at the time of consumer 1's purchase.  Consumers 2 through 7 each bought yogurt 2, etc. You may want to reshape the data from its current "wide" format into a "long" format._
+  return(list(final_clusters = clusters, centers = centers, history = history))
+}
 
-_todo: Fit the standard MNL model on these data.  Then fit the latent-class MNL on these data separately for 2, 3, 4, and 5 latent classes._
+# Run the algorithm
+X <- as.matrix(penguins_clean)
+k_result <- k_means_custom(X, k = 3, max_iter = 10)
+```
 
-_todo: How many classes are suggested by the $BIC = -2*\ell_n  + k*log(n)$? (where $\ell_n$ is the log-likelihood, $n$ is the sample size, and $k$ is the number of parameters.) The Bayesian-Schwarz Information Criterion [link](https://en.wikipedia.org/wiki/Bayesian_information_criterion) is a metric that assess the benefit of a better log likelihood at the expense of additional parameters to estimate -- akin to the adjusted R-squared for the linear regression model. Note, that a **lower** BIC indicates a better model fit, accounting for the number of parameters in the model._
+### Optimal Number of Clusters
 
-_todo: compare the parameter estimates between (1) the aggregate MNL, and (2) the latent-class MNL with the number of classes suggested by the BIC._
+To determine the appropriate number of clusters for the penguins data, we compute two metrics:
+- **Within-cluster sum of squares (WCSS)**: Measures compactness of clusters.
+- **Silhouette score**: Measures separation between clusters.
+
+We vary K from 2 to 7 and evaluate both metrics.
+
+```{r, message=FALSE, warning=FALSE}
+library(cluster)  # for silhouette()
+library(factoextra)  # for easy visualization
+
+# Prepare clean data
+X <- na.omit(penguins %>%
+               select(bill_length_mm, flipper_length_mm)) %>%
+     as.matrix()
+
+# Initialize results
+wcss <- c()
+silhouette_avg <- c()
+
+# Loop over values of K
+for (k in 2:7) {
+  k_result <- kmeans(X, centers = k, nstart = 10)
+  wcss[k] <- k_result$tot.withinss
+  
+  # Calculate silhouette score
+  sil <- silhouette(k_result$cluster, dist(X))
+  silhouette_avg[k] <- mean(sil[, 3])
+}
+
+# Plot WCSS
+plot(2:7, wcss[2:7], type = "b", col = "steelblue", pch = 19,
+     xlab = "Number of Clusters (K)", ylab = "Within-Cluster Sum of Squares",
+     main = "Elbow Method: WCSS vs K")
+
+# Plot Silhouette scores
+plot(2:7, silhouette_avg[2:7], type = "b", col = "darkorange", pch = 19,
+     xlab = "Number of Clusters (K)", ylab = "Average Silhouette Score",
+     main = "Silhouette Score vs K")
+```
+
 
 
 
