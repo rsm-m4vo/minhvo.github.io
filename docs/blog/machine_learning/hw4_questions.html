@@ -418,16 +418,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>accuracy_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">k =</span> k_vals, <span class="at">accuracy =</span> accuracy_scores)</span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(accuracy_df, <span class="fu">aes</span>(<span class="at">x =</span> k, <span class="at">y =</span> accuracy)) <span class="sc">+</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span>   <span class="co"># &lt;- fixed here</span></span>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"tomato"</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"KNN Accuracy on Test Set by k"</span>,</span>
 <span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Number of Neighbors (k)"</span>,</span>
 <span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Accuracy"</span>) <span class="sc">+</span></span>
 <span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-ℹ Please use `linewidth` instead.</code></pre>
-</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -438,7 +434,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="choosing-the-optimal-value-of-k" class="level3">
 <h3 class="anchored" data-anchor-id="choosing-the-optimal-value-of-k">Choosing the Optimal Value of k</h3>
-<p>To choose the best number of neighbors for our KNN classifier, we evaluated prediction accuracy across values of ( k ) from 1 to 30. The plot shows that test accuracy is highest at around <strong>k = X</strong> (insert actual value based on your plot), after which accuracy either flattens or declines slightly. This is consistent with the KNN trade-off: small ( k ) may overfit to noise, while large ( k ) may smooth over important local structure. Based on this plot, <strong>k = X</strong> appears to be the optimal choice for this dataset.</p>
+<p>To find the best value for the number of neighbors in our KNN model, we tested values from 1 to 30 and measured how accurately the model predicted the test data for each. The plot above shows that the model performed best when k equals 2, achieving the highest accuracy of about 57 percent.</p>
+<p>As the number of neighbors increases beyond 2, accuracy begins to decline. This makes sense: with small values of k, the model can adapt closely to local patterns in the data. As k increases, the model becomes more generalized and may miss important local structure.</p>
+<p>Based on the results, k = 2 provides the best performance for this particular dataset.</p>
 
 
 </section>

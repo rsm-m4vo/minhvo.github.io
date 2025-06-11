@@ -215,7 +215,7 @@ library(ggplot2)
 accuracy_df <- data.frame(k = k_vals, accuracy = accuracy_scores)
 
 ggplot(accuracy_df, aes(x = k, y = accuracy)) +
-  geom_line(color = "steelblue", size = 1) +
+  geom_line(color = "steelblue", linewidth = 1) +   # <- fixed here
   geom_point(color = "tomato", size = 2) +
   labs(title = "KNN Accuracy on Test Set by k",
        x = "Number of Neighbors (k)",
@@ -224,4 +224,8 @@ ggplot(accuracy_df, aes(x = k, y = accuracy)) +
 ```
 ### Choosing the Optimal Value of k
 
-To choose the best number of neighbors for our KNN classifier, we evaluated prediction accuracy across values of \( k \) from 1 to 30. The plot shows that test accuracy is highest at around **k = X** (insert actual value based on your plot), after which accuracy either flattens or declines slightly. This is consistent with the KNN trade-off: small \( k \) may overfit to noise, while large \( k \) may smooth over important local structure. Based on this plot, **k = X** appears to be the optimal choice for this dataset.
+To find the best value for the number of neighbors in our KNN model, we tested values from 1 to 30 and measured how accurately the model predicted the test data for each. The plot above shows that the model performed best when k equals 2, achieving the highest accuracy of about 57 percent.
+
+As the number of neighbors increases beyond 2, accuracy begins to decline. This makes sense: with small values of k, the model can adapt closely to local patterns in the data. As k increases, the model becomes more generalized and may miss important local structure.
+
+Based on the results, k = 2 provides the best performance for this particular dataset.
