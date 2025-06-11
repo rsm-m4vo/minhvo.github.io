@@ -3,6 +3,14 @@ title: "Machine Learning"
 author: "Minh Vo"
 date: 2025-06-11
 ---
+## Introduction
+
+This blog post explores two core machine learning tasks using custom code implementations in R:
+
+1. **Unsupervised Learning**: We build K-means from scratch and evaluate clustering performance using the Palmer Penguins dataset.
+2. **Supervised Learning**: We implement K-Nearest Neighbors (KNN) from scratch and use a synthetic dataset with a non-linear decision boundary to test model performance.
+
+For each method, we visualize results, tune parameters, and compare our custom approach to built-in R functions to validate correctness. This hands-on walkthrough is meant to build intuition behind how these foundational algorithms work.
 
 ```{r, message=FALSE, warning=FALSE}
 library(readr)
@@ -103,6 +111,14 @@ plot(2:7, silhouette_avg[2:7], type = "b", col = "darkorange", pch = 19,
      main = "Silhouette Score vs K")
 ```
 
+### Choosing the Optimal Number of Clusters
+
+We use two metrics to evaluate the number of clusters:
+
+- **Within-Cluster Sum of Squares (WCSS)** drops sharply at K = 3, then flattens — suggesting diminishing returns after 3 clusters. This is known as the "elbow" point, and it often signals the ideal K.
+- **Silhouette Score** is highest at K = 2, but drops quickly afterward. While 2 clusters gives the cleanest separation, it may oversimplify the structure.
+
+Considering both metrics, **K = 3** is a balanced choice — it captures additional structure while maintaining compact, well-separated clusters. This aligns with the natural grouping observed in the penguins dataset.
 
 
 

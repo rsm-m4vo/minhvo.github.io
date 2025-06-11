@@ -152,9 +152,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#a.-k-means" id="toc-a.-k-means" class="nav-link active" data-scroll-target="#a.-k-means">1a. K-Means</a>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#a.-k-means" id="toc-a.-k-means" class="nav-link" data-scroll-target="#a.-k-means">1a. K-Means</a>
   <ul class="collapse">
   <li><a href="#optimal-number-of-clusters" id="toc-optimal-number-of-clusters" class="nav-link" data-scroll-target="#optimal-number-of-clusters">Optimal Number of Clusters</a></li>
+  <li><a href="#choosing-the-optimal-number-of-clusters" id="toc-choosing-the-optimal-number-of-clusters" class="nav-link" data-scroll-target="#choosing-the-optimal-number-of-clusters">Choosing the Optimal Number of Clusters</a></li>
   </ul></li>
   <li><a href="#a.-k-nearest-neighbors" id="toc-a.-k-nearest-neighbors" class="nav-link" data-scroll-target="#a.-k-nearest-neighbors">2a. K Nearest Neighbors</a>
   <ul class="collapse">
@@ -197,6 +199,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>This blog post explores two core machine learning tasks using custom code implementations in R:</p>
+<ol type="1">
+<li><strong>Unsupervised Learning</strong>: We build K-means from scratch and evaluate clustering performance using the Palmer Penguins dataset.</li>
+<li><strong>Supervised Learning</strong>: We implement K-Nearest Neighbors (KNN) from scratch and use a synthetic dataset with a non-linear decision boundary to test model performance.</li>
+</ol>
+<p>For each method, we visualize results, tune parameters, and compare our custom approach to built-in R functions to validate correctness. This hands-on walkthrough is meant to build intuition behind how these foundational algorithms work.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
@@ -207,6 +217,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>penguins <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"../../data/palmer_penguins.csv"</span>)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>yogurt <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"../../data/yogurt_data.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
 <section id="a.-k-means" class="level2">
 <h2 class="anchored" data-anchor-id="a.-k-means">1a. K-Means</h2>
 <p>We implement the K-means clustering algorithm from scratch to cluster penguins based on two continuous features: bill length and flipper length. K-means attempts to partition data into <code>k</code> clusters by iteratively updating cluster centers and reassigning points based on Euclidean distance. ::: {.cell}</p>
@@ -301,6 +312,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+</section>
+<section id="choosing-the-optimal-number-of-clusters" class="level3">
+<h3 class="anchored" data-anchor-id="choosing-the-optimal-number-of-clusters">Choosing the Optimal Number of Clusters</h3>
+<p>We use two metrics to evaluate the number of clusters:</p>
+<ul>
+<li><strong>Within-Cluster Sum of Squares (WCSS)</strong> drops sharply at K = 3, then flattens — suggesting diminishing returns after 3 clusters. This is known as the “elbow” point, and it often signals the ideal K.</li>
+<li><strong>Silhouette Score</strong> is highest at K = 2, but drops quickly afterward. While 2 clusters gives the cleanest separation, it may oversimplify the structure.</li>
+</ul>
+<p>Considering both metrics, <strong>K = 3</strong> is a balanced choice — it captures additional structure while maintaining compact, well-separated clusters. This aligns with the natural grouping observed in the penguins dataset.</p>
 </section>
 </section>
 <section id="a.-k-nearest-neighbors" class="level2">
