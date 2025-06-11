@@ -133,8 +133,6 @@ We use two metrics to evaluate the number of clusters:
 
 Considering both metrics, **K = 3** is a balanced choice — it captures additional structure while maintaining compact, well-separated clusters. This aligns with the natural grouping observed in the penguins dataset.
 
-
-
 ## 2a. K Nearest Neighbors
 
 ```{r}
@@ -259,3 +257,13 @@ To find the best value for the number of neighbors in our KNN model, we tested v
 As the number of neighbors increases beyond 2, accuracy begins to decline. This makes sense: with small values of k, the model can adapt closely to local patterns in the data. As k increases, the model becomes more generalized and may miss important local structure.
 
 Based on the results, k = 2 provides the best performance for this particular dataset.
+
+```{r}
+# Final KNN model with optimal k
+pred_best <- knn_custom(train_X, train_y, test_X, k = 2)
+final_accuracy <- mean(pred_best == test_y)
+final_accuracy
+```
+### Final KNN Classification Accuracy
+
+As shown above, by using the optimal number of neighbors (k = 2), our custom KNN classifier achieved a test accuracy of approximately **57%**.

@@ -161,6 +161,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#a.-k-nearest-neighbors" id="toc-a.-k-nearest-neighbors" class="nav-link" data-scroll-target="#a.-k-nearest-neighbors">2a. K Nearest Neighbors</a>
   <ul class="collapse">
   <li><a href="#choosing-the-optimal-value-of-k" id="toc-choosing-the-optimal-value-of-k" class="nav-link" data-scroll-target="#choosing-the-optimal-value-of-k">Choosing the Optimal Value of k</a></li>
+  <li><a href="#final-knn-classification-accuracy" id="toc-final-knn-classification-accuracy" class="nav-link" data-scroll-target="#final-knn-classification-accuracy">Final KNN Classification Accuracy</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -495,6 +496,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>To find the best value for the number of neighbors in our KNN model, we tested values from 1 to 30 and measured how accurately the model predicted the test data for each. The plot above shows that the model performed best when k equals 2, achieving the highest accuracy of about 57 percent.</p>
 <p>As the number of neighbors increases beyond 2, accuracy begins to decline. This makes sense: with small values of k, the model can adapt closely to local patterns in the data. As k increases, the model becomes more generalized and may miss important local structure.</p>
 <p>Based on the results, k = 2 provides the best performance for this particular dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Final KNN model with optimal k</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>pred_best <span class="ot">&lt;-</span> <span class="fu">knn_custom</span>(train_X, train_y, test_X, <span class="at">k =</span> <span class="dv">2</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>final_accuracy <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_best <span class="sc">==</span> test_y)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>final_accuracy</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.57</code></pre>
+</div>
+</div>
+</section>
+<section id="final-knn-classification-accuracy" class="level3">
+<h3 class="anchored" data-anchor-id="final-knn-classification-accuracy">Final KNN Classification Accuracy</h3>
+<p>As shown above, by using the optimal number of neighbors (k = 2), our custom KNN classifier achieved a test accuracy of approximately <strong>57%</strong>.</p>
 
 
 </section>
