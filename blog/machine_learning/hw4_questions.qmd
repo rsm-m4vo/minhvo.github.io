@@ -152,8 +152,13 @@ We use two metrics to evaluate the number of clusters:
 Considering both metrics, **K = 3** is a balanced choice — it captures additional structure while maintaining compact, well-separated clusters. This aligns with the natural grouping observed in the penguins dataset.
 
 ```{r}
+X <- as.matrix(penguins_clean)
+k_result <- k_means_custom(X, k = 3, max_iter = 10)
+
+length(k_result$final_clusters)  # should be 333
+
 penguins_clustered <- penguins_clean %>%
-  mutate(cluster = factor(3))
+  mutate(cluster = factor(k_result$final_clusters))
 
 centers_final <- as.data.frame(k_result$centers)
 
