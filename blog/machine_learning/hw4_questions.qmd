@@ -32,6 +32,19 @@ penguins_clean <- penguins %>%
   select(bill_length_mm, flipper_length_mm) %>%
   na.omit()
 
+# Preview the cleaned dataset
+head(penguins_clean)
+
+# Optional: Show summary statistics for the clustering variables
+summary(penguins_clean)
+
+ggplot(penguins_clean, aes(x = bill_length_mm, y = flipper_length_mm)) +
+  geom_point(color = "gray40") +
+  labs(title = "Penguins: Bill Length vs Flipper Length",
+       x = "Bill Length (mm)",
+       y = "Flipper Length (mm)") +
+  theme_minimal()
+
 set.seed(1)
 
 # Initialize K-means from scratch
@@ -201,7 +214,8 @@ test_y <- test_dat$y
 pred_custom <- knn_custom(train_X, train_y, test_X, k = 5)
 
 # Accuracy
-mean(pred_custom == test_y)
+acc_custom <- mean(pred_custom == test_y)
+acc_custom
 ```
 
 ```{r}
@@ -213,7 +227,7 @@ pred_builtin <- knn(train = train_X, test = test_X, cl = train_y, k = 5)
 mean(pred_builtin == test_y)
 ```
 
-We implemented the K-nearest neighbors (KNN) algorithm from scratch using Euclidean distance to classify new observations based on their k = 5 closest training points. Our custom implementation achieved an accuracy of about r mean(pred_custom == test_y) on the test data. To validate our results, we used R’s built-in class::knn() function, which gave the same prediction accuracy — confirming that our implementation works correctly.
+We implemented the K-nearest neighbors (KNN) algorithm from scratch using Euclidean distance to classify new observations based on their k = 5 closest training points. Our custom implementation achieved an accuracy of about `r round(mean(pred_custom == test_y), 2)` on the test data. To validate our results, we used R’s built-in class::knn() function, which gave the same prediction accuracy — confirming that our implementation works correctly.
 
 ```{r}
 # Track accuracy across different k values
