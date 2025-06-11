@@ -59,23 +59,26 @@ k_means_custom <- function(data, k = 3, max_iter = 10) {
     dists <- sapply(1:k, function(i) rowSums((data - centers[i, ])^2))
     new_clusters <- apply(dists, 1, which.min)
 
+    # Update clusters FIRST so history records correct labels
+    clusters <- new_clusters
+
     # Store for plotting
-    history[[iter]] <- list(centers = centers, clusters = new_clusters)
+    history[[iter]] <- list(centers = centers, clusters = clusters)
 
     # Update centers
     for (i in 1:k) {
-      if (sum(new_clusters == i) > 0) {
-        centers[i, ] <- colMeans(data[new_clusters == i, , drop = FALSE])
+      if (sum(clusters == i) > 0) {
+        centers[i, ] <- colMeans(data[clusters == i, , drop = FALSE])
       }
     }
 
     # Check convergence
     if (all(new_clusters == clusters)) break
-    clusters <- new_clusters
   }
 
   return(list(final_clusters = clusters, centers = centers, history = history))
 }
+
 
 # Run the algorithm
 X <- as.matrix(penguins_clean)
@@ -155,8 +158,6 @@ Considering both metrics, **K = 3** is a balanced choice — it captures additio
 X <- as.matrix(penguins_clean)
 k_result <- k_means_custom(X, k = 3, max_iter = 10)
 
-length(k_result$final_clusters)  # should be 333
-
 penguins_clustered <- penguins_clean %>%
   mutate(cluster = factor(k_result$final_clusters))
 
@@ -168,7 +169,8 @@ ggplot(penguins_clustered, aes(x = bill_length_mm, y = flipper_length_mm, color 
              shape = 8, size = 4, color = "black") +
   labs(title = "Final K-means Clustering with k = 3",
        x = "Bill Length (mm)",
-       y = "Flipper Length (mm)") +
+       y = "Flipper Length (mm)",
+       color = "Cluster") +
   theme_minimal()
 ```
 
