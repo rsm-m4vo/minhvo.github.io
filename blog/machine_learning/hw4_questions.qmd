@@ -80,6 +80,24 @@ k_means_custom <- function(data, k = 3, max_iter = 10) {
 # Run the algorithm
 X <- as.matrix(penguins_clean)
 k_result <- k_means_custom(X, k = 3, max_iter = 10)
+
+# Visualize cluster assignments over iterations
+for (i in seq_along(k_result$history)) {
+  cluster_df <- penguins_clean %>%
+    mutate(cluster = factor(k_result$history[[i]]$clusters))
+
+  centers_df <- as.data.frame(k_result$history[[i]]$centers)
+
+  p <- ggplot(cluster_df, aes(x = bill_length_mm, y = flipper_length_mm, color = cluster)) +
+    geom_point(size = 2, alpha = 0.7) +
+    geom_point(data = centers_df, aes(x = bill_length_mm, y = flipper_length_mm),
+               shape = 8, size = 4, color = "black") +
+    labs(title = paste("K-means Iteration", i),
+         x = "Bill Length (mm)",
+         y = "Flipper Length (mm)")
+
+  print(p)
+}
 ```
 
 ### Optimal Number of Clusters
@@ -132,6 +150,24 @@ We use two metrics to evaluate the number of clusters:
 - **Silhouette Score** is highest at K = 2, but drops quickly afterward. While 2 clusters gives the cleanest separation, it may oversimplify the structure.
 
 Considering both metrics, **K = 3** is a balanced choice — it captures additional structure while maintaining compact, well-separated clusters. This aligns with the natural grouping observed in the penguins dataset.
+
+```{r}
+penguins_clustered <- penguins_clean %>%
+  mutate(cluster = factor(3))
+
+centers_final <- as.data.frame(k_result$centers)
+
+ggplot(penguins_clustered, aes(x = bill_length_mm, y = flipper_length_mm, color = cluster)) +
+  geom_point(size = 2, alpha = 0.8) +
+  geom_point(data = centers_final, aes(x = bill_length_mm, y = flipper_length_mm),
+             shape = 8, size = 4, color = "black") +
+  labs(title = "Final K-means Clustering with k = 3",
+       x = "Bill Length (mm)",
+       y = "Flipper Length (mm)") +
+  theme_minimal()
+```
+
+Our custom K-means implementation identified 3 well-separated clusters in the penguins dataset. Visualization of each step shows how the algorithm converges toward stable centroids.
 
 ## 2a. K Nearest Neighbors
 
